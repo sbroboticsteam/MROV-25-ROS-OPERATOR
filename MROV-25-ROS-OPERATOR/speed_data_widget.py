@@ -1,0 +1,93 @@
+"""
+Widget to display if theres a leak in the E-Box
+Author: Tyerone Chen
+Create Date: 11/16/2025
+Last Update: 12/2/2025
+"""
+# imports
+import rclpy
+import array
+import rclpy.callback_groups
+from rclpy.node import Node
+from rqt_gui_py.plugin import Plugin
+from std_msgs.msg import Float64MultiArray
+from python_qt_binding.QtWidgets import QWidget, QProgressBar, QLabel, QGridLayout
+from python_qt_binding.QtCore import Signal, Slot, Qt
+
+class SpeedDataWidget(QWidget):
+    # Consts
+    SUB_TO = 'rov/speed' # what to subscribe to, will change with the use of ip
+    NUM_OF_BARS = 3 # Number of bars, so 8 cuz 8 motors duh
+    MIN_VAL = 0 # change these vcals later
+    MAX_VAL = 100
+    # Vars
+    value_signal = Signal(list)
+    def __init__(self, node_instance):
+        super().__init__()
+        # Node Setup
+        self.node = node_instance
+        # Widget Setup
+        layout = QGridLayout()
+        self.bars = [] # Holds ProgBars
+        self.value_labels = [] # holds the raw vals
+        # Looped setup whatever crap
+        for i in range(self.NUM_OF_BARS):
+            label = QLabel(f"Speed Data {i + 1}: ")
+            bar = QProgressBar()
+            bar.setRange(self.MIN_VAL, self.MAX_VAL)
+            bar.setFormat("")
+            value_label = QLabel("---")
+            value_label.setObjectName(f"speed_value_label_{i}")
+            self.value_labels.append(value_label)
+            self.bars.append(bar)
+            layout.addWidget(label, i, 0)
+            layout.addWidget(bar, i, 1)
+            layout.addWidget(value_label, i, 2)
+        self.setLayout(layout)
+        # Styleshit, do later
+        self.setStyleSheet("""
+            QWidget {
+                border: 1px solid #454d55;
+                border-radius: 5px;
+                padding: 5px;
+                margin: 5px;
+            }
+            QLabel {
+            }
+        """)
+        # Singal Connection
+        self.value_signal.connect(self.update_bars)
+        # Sub Connections
+        self.subscription = self.node.create_subscription(Float64MultiArray, self.SUB_TO, self.callback, 
+            10, callback_group=rclpy.callback_groups.ReentrantCallbackGroup())
+        pass
+    # Methods
+    # calcback
+    def callback(self, msg):
+        self.value_signal.emit(list(msg.data))
+    # Slotss
+    @Slot(list)
+    def update_bars(self, value_list):
+        for i, val in enumerate(value_list):
+            if i < len(self.bars):
+                int_val = int(round(val))
+                clamped_val = max(self.MIN_VAL, min(self.MAX_VAL, int_val))
+                self.bars[i].setValue(clamped_val)
+                self.value_labels[i].setText(f"{clamped_val}")
+    # shuts a down
+    def shutdown(self):
+        if hasattr(self, 'sub') and self.sub:
+            self.node.destroy_subscription(self.sub)
+        if hasattr(self, 'subscription') and self.subscription:
+            self.node.destroy_subscription(self.subscription)
+
+class SpeedDataPlugin(Plugin):
+    def __init__(self, context):
+        super(SpeedDataPlugin, self).__init__(context)
+        self.setObjectName('SpeedDataPlugin')
+        self.node = context.node
+        self.widget = SpeedDataWidget(self.node)
+        context.add_widget(self.widget)
+    # shutdown process
+    def shutdown_plugin(self):
+        self.widget.shutdown()
