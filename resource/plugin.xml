@@ -1,0 +1,67 @@
+<library path="py_rov_gui">
+  <!-- Gen Camera Plugin-->
+  <class name="GenCameraWidget" 
+        type="py_rov_gui.gen_camera_widget.GenCameraPlugin" 
+        base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A
+    </description>
+    <qtgui>
+      <label>ROS 2 ROV-Gen-Camera</label>
+      <icon type="theme">camera-video</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
+  <!-- Gen Data Plugin-->
+  <class name="GenDataWidget" 
+        type="py_rov_gui.gen_data_widget.GenDataPlugin" 
+        base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A
+    </description>
+    <qtgui>
+      <label>ROS 2 ROV-Gen-Data</label>
+      <icon type="theme">utilities-terminal</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
+  <!-- Leak Sensor Plugin-->
+  <class name="LeakSensorWidget" 
+        type="py_rov_gui.leak_sensor_widget.LeakSensorPlugin" 
+        base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A
+    </description>
+    <qtgui>
+      <label>ROS 2 ROV-Leak-Sensor</label>
+      <icon type="theme">utilities-terminal</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
+  <!-- Motor Data Plugin-->
+  <class name="MotorDataWidget" 
+        type="py_rov_gui.motor_data_widget.MotorDataPlugin" 
+        base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A
+    </description>
+    <qtgui>
+      <label>ROS 2 ROV-Motor-Data</label>
+      <icon type="theme">utilities-terminal</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
+  <!-- Speed Data Plugin-->
+  <class name="SpeedDataWidget" 
+        type="py_rov_gui.speed_data_widget.SpeedDataPlugin" 
+        base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A
+    </description>
+    <qtgui>
+      <label>ROS 2 ROV-Speed-Data</label>
+      <icon type="theme">measure</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
+</library>
