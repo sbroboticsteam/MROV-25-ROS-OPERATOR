@@ -2,7 +2,8 @@ import os
 from setuptools import find_packages, setup
 from glob import glob
 
-package_name = 'MROV-25-ROS-OPERATOR'
+package_name = 'MROV-25-ROS-OPERATOR' 
+module_name = 'mrov_25_ros_operator' #idk if this is the right name?
 
 setup(
     name=package_name,
@@ -25,12 +26,17 @@ setup(
         ],
     },
     entry_points={
+        'console_scripts': [
+            'simple_simpub = '+module_name+'.simple_simpub:main',
+            'simple_campub = '+module_name+'.simple_campub:main',
+        ],
+        
         'rqt_gui_py.plugins': [
-            'GenCameraWidget = MROV-25-ROS-OPERATOR.gen_camera_widget.GenCameraPlugin',
-            'GenDataWidget = MROV-25-ROS-OPERATOR.gen_data_widget:GenDataPlugin',
-            'LeakSensorWidget = MROV-25-ROS-OPERATOR.leak_sensor_widget.LeakSensorPlugin',
-            'MotorDataWidget = MROV-25-ROS-OPERATOR.motor_data_widget.MotorDataPlugin',
-            'SpeedDataWidget = MROV-25-ROS-OPERATOR.speed_data_widget.SpeedDataPlugin'
+            'GenCameraWidget = '+module_name+'.gen_camera_widget.GenCameraPlugin',
+            'GenDataWidget = '+module_name+'.gen_data_widget:GenDataPlugin',
+            'LeakSensorWidget = '+module_name+'.leak_sensor_widget.LeakSensorPlugin',
+            'MotorDataWidget = '+module_name+'.motor_data_widget.MotorDataPlugin',
+            'SpeedDataWidget = '+module_name+'.speed_data_widget.SpeedDataPlugin'
         ],
     },
 )
