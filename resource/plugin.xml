@@ -1,7 +1,7 @@
-<library path="py_rov_gui">
+<library path="MROV-25-ROS-OPERATOR">
   <!-- Gen Camera Plugin-->
   <class name="GenCameraWidget" 
-        type="py_rov_gui.gen_camera_widget.GenCameraPlugin" 
+        type="MROV-25-ROS-OPERATOR.gen_camera_widget.GenCameraPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -14,7 +14,7 @@
   </class>
   <!-- Gen Data Plugin-->
   <class name="GenDataWidget" 
-        type="py_rov_gui.gen_data_widget.GenDataPlugin" 
+        type="MROV-25-ROS-OPERATOR.gen_data_widget.GenDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -27,7 +27,7 @@
   </class>
   <!-- Leak Sensor Plugin-->
   <class name="LeakSensorWidget" 
-        type="py_rov_gui.leak_sensor_widget.LeakSensorPlugin" 
+        type="MROV-25-ROS-OPERATOR.leak_sensor_widget.LeakSensorPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -40,7 +40,7 @@
   </class>
   <!-- Motor Data Plugin-->
   <class name="MotorDataWidget" 
-        type="py_rov_gui.motor_data_widget.MotorDataPlugin" 
+        type="MROV-25-ROS-OPERATOR.motor_data_widget.MotorDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -53,7 +53,7 @@
   </class>
   <!-- Speed Data Plugin-->
   <class name="SpeedDataWidget" 
-        type="py_rov_gui.speed_data_widget.SpeedDataPlugin" 
+        type="MROV-25-ROS-OPERATOR.speed_data_widget.SpeedDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
