@@ -2,17 +2,16 @@
 Widget to display if theres a leak in the E-Box
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 12/2/2025
+Last Update: 1/12/2026
 """
 # imports
 import rclpy
-import array
 import rclpy.callback_groups
 from rclpy.node import Node
 from rqt_gui_py.plugin import Plugin
 from std_msgs.msg import Float64MultiArray
 from python_qt_binding.QtWidgets import QWidget, QProgressBar, QLabel, QGridLayout
-from python_qt_binding.QtCore import Signal, Slot, Qt
+from python_qt_binding.QtCore import Signal, Slot
 
 class SpeedDataWidget(QWidget):
     # Consts
@@ -47,7 +46,9 @@ class SpeedDataWidget(QWidget):
         # Styleshit, do later
         self.setStyleSheet("""
             QWidget {
-                border: 1px solid #454d55;
+                color: #ccc;
+                background: #141414;
+                border: 3px solid #282828;
                 border-radius: 5px;
                 padding: 5px;
                 margin: 5px;
