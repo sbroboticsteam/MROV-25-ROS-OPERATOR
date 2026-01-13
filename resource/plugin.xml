@@ -64,4 +64,17 @@
       <statustip></statustip>
     </qtgui>
   </class>
+  <!-- Controller Plugin-->
+  <class name="ControllerWidget" 
+        type="py_rov_gui.controller_widget.ControllerPlugin" 
+        base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A
+    </description>
+    <qtgui>
+      <label>ROS 2 ROV-Controller</label>
+      <icon type="theme">controller</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
 </library>
