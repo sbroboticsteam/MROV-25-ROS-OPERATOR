@@ -2,7 +2,7 @@
 Widget to display if theres a leak in the E-Box
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 12/2/2025
+Last Update: 1/12/2026
 """
 # imports
 import rclpy
@@ -31,7 +31,9 @@ class LeakSensorWidget(QWidget):
         # Stylesheet stuff
         self.setStyleSheet("""
             QWidget {
-                border: 1px solid #454d55;
+                color: #ccc;
+                background: #141414;
+                border: 3px solid #282828;
                 border-radius: 5px;
                 padding: 5px;
                 margin: 5px;
