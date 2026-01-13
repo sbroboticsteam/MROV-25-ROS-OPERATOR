@@ -1,8 +1,8 @@
 """
-Widget to display if theres a leak in the E-Box
+Just a gen data widget idk what its supposed to do specifically
 Author: Tyerone Chen
 Create Date: 11/19/2025
-Last Update: 11/19/2025
+Create Date: 1/12/2026
 """
 # imports
 import rclpy
@@ -14,7 +14,7 @@ from python_qt_binding.QtCore import Signal, Slot
 
 class GenDataWidget(QWidget):
     # Consts
-    SUB_TO = 'rov/data' # E-Box Node
+    SUB_TO = 'rov/data' # change later maybe
     # Vars
     data_signal = Signal(str)
     def __init__(self, node_instance):
@@ -22,15 +22,17 @@ class GenDataWidget(QWidget):
         #Nde setup
         self.node = node_instance
         #widget setup
-        layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
         self.data_label = QLabel("No Data Recieved...")
         self.data_label.setStyleSheet("font-size: 16px; font-weight: bold;")
-        layout.addWidget(self.data_label)
-        self.setLayout(layout)
+        self.layout.addWidget(self.data_label)
+        self.setLayout(self.layout)
         # Stylesheet stuff
         self.setStyleSheet("""
             QWidget {
-                border: 1px solid #454d55;
+                color: #ccc;
+                background: #141414;
+                border: 3px solid #282828;
                 border-radius: 5px;
                 padding: 5px;
                 margin: 5px;
