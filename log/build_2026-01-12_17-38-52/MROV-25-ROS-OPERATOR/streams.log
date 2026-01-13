@@ -1,0 +1,25 @@
+[0.492s] Invoking command in '/home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR': PYTHONPATH=/home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/install/MROV-25-ROS-OPERATOR/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/MROV-25-ROS-OPERATOR build --build-base /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/build install --record /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/install.log --single-version-externally-managed install_data
+[0.708s] running egg_info
+[0.709s] writing build/MROV-25-ROS-OPERATOR/MROV_25_ROS_OPERATOR.egg-info/PKG-INFO
+[0.709s] writing dependency_links to build/MROV-25-ROS-OPERATOR/MROV_25_ROS_OPERATOR.egg-info/dependency_links.txt
+[0.709s] writing entry points to build/MROV-25-ROS-OPERATOR/MROV_25_ROS_OPERATOR.egg-info/entry_points.txt
+[0.710s] writing requirements to build/MROV-25-ROS-OPERATOR/MROV_25_ROS_OPERATOR.egg-info/requires.txt
+[0.710s] writing top-level names to build/MROV-25-ROS-OPERATOR/MROV_25_ROS_OPERATOR.egg-info/top_level.txt
+[0.713s] reading manifest file 'build/MROV-25-ROS-OPERATOR/MROV_25_ROS_OPERATOR.egg-info/SOURCES.txt'
+[0.713s] adding license file 'LICENSE'
+[0.713s] writing manifest file 'build/MROV-25-ROS-OPERATOR/MROV_25_ROS_OPERATOR.egg-info/SOURCES.txt'
+[0.713s] running build
+[0.713s] running build_py
+[0.713s] copying MROV_25_ROS_OPERATOR/joy_to_controller.py -> /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/build/lib/MROV_25_ROS_OPERATOR
+[0.713s] running install
+[0.714s] running install_lib
+[0.715s] copying /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/build/lib/MROV_25_ROS_OPERATOR/joy_to_controller.py -> /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/install/MROV-25-ROS-OPERATOR/lib/python3.10/site-packages/MROV_25_ROS_OPERATOR
+[0.715s] byte-compiling /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/install/MROV-25-ROS-OPERATOR/lib/python3.10/site-packages/MROV_25_ROS_OPERATOR/joy_to_controller.py to joy_to_controller.cpython-310.pyc
+[0.717s] running install_data
+[0.717s] running install_egg_info
+[0.717s] removing '/home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/install/MROV-25-ROS-OPERATOR/lib/python3.10/site-packages/MROV_25_ROS_OPERATOR-0.0.0-py3.10.egg-info' (and everything under it)
+[0.718s] Copying build/MROV-25-ROS-OPERATOR/MROV_25_ROS_OPERATOR.egg-info to /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/install/MROV-25-ROS-OPERATOR/lib/python3.10/site-packages/MROV_25_ROS_OPERATOR-0.0.0-py3.10.egg-info
+[0.719s] running install_scripts
+[0.735s] Installing controller = MROV_25_ROS_OPERATOR.controller:mainjoy_to_controller script to /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/install/MROV-25-ROS-OPERATOR/lib/MROV-25-ROS-OPERATOR
+[0.736s] writing list of installed files to '/home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/install.log'
+[0.753s] Invoked command in '/home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR' returned '0': PYTHONPATH=/home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/install/MROV-25-ROS-OPERATOR/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/MROV-25-ROS-OPERATOR build --build-base /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/build install --record /home/germangiraffe/Documents/Robotics/MROV-25-ROS-OPERATOR/build/MROV-25-ROS-OPERATOR/install.log --single-version-externally-managed install_data

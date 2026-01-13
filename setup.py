@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-           "controller = MROV_25_ROS_OPERATOR.controller:main"
+           "controller = MROV_25_ROS_OPERATOR.controller:main",
+           "joy_to_controller = MROV_25_ROS_OPERATOR.joy_to_controller:main"
         ],
     },
 )
