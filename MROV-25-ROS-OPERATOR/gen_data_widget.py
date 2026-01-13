@@ -1,8 +1,8 @@
 """
-Widget to display if theres a leak in the E-Box
+Just a gen data widget idk what its supposed to do specifically
 Author: Tyerone Chen
-Create Date: 11/16/2025
-Last Update: 1/12/2026
+Create Date: 11/19/2025
+Create Date: 1/12/2026
 """
 # imports
 import rclpy
@@ -12,22 +12,21 @@ from std_msgs.msg import String
 from python_qt_binding.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout
 from python_qt_binding.QtCore import Signal, Slot
 
-class LeakSensorWidget(QWidget):
+class GenDataWidget(QWidget):
     # Consts
-    SUB_TO = 'rov/leak' # E-Box Node
+    SUB_TO = 'rov/data' # change later maybe
     # Vars
     data_signal = Signal(str)
-    leak_detected = False
     def __init__(self, node_instance):
         super().__init__()
         #Nde setup
         self.node = node_instance
         #widget setup
-        layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
         self.data_label = QLabel("No Data Recieved...")
         self.data_label.setStyleSheet("font-size: 16px; font-weight: bold;")
-        layout.addWidget(self.data_label)
-        self.setLayout(layout)
+        self.layout.addWidget(self.data_label)
+        self.setLayout(self.layout)
         # Stylesheet stuff
         self.setStyleSheet("""
             QWidget {
@@ -60,13 +59,13 @@ class LeakSensorWidget(QWidget):
             self.node.destroy_subscription(self.sub)
         if hasattr(self, 'subscription') and self.subscription:
             self.node.destroy_subscription(self.subscription)
-# Plugin
-class LeakSensorPlugin(Plugin):
+
+class GenDataPlugin(Plugin):
     def __init__(self, context):
-        super(LeakSensorPlugin, self).__init__(context)
-        self.setObjectName('LeakSensorPlugin')
+        super(GenDataPlugin, self).__init__(context)
+        self.setObjectName('GenDataPlugin')
         self.node = context.node
-        self.widget = LeakSensorWidget(self.node)
+        self.widget = GenDataWidget(self.node)
         context.add_widget(self.widget)
     # shutdown process
     def shutdown_plugin(self):
