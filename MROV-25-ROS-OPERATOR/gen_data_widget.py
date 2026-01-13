@@ -1,8 +1,8 @@
 """
-Just a gen data widget idk what its supposed to do specifically
+Widget to display if theres a leak in the E-Box
 Author: Tyerone Chen
-Create Date: 11/19/2025
-Create Date: 1/12/2026
+Create Date: 11/16/2025
+Last Update: 1/12/2026
 """
 # imports
 import rclpy
@@ -12,21 +12,22 @@ from std_msgs.msg import String
 from python_qt_binding.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout
 from python_qt_binding.QtCore import Signal, Slot
 
-class GenDataWidget(QWidget):
+class LeakSensorWidget(QWidget):
     # Consts
-    SUB_TO = 'rov/data' # change later maybe
+    SUB_TO = 'rov/leak' # E-Box Node
     # Vars
     data_signal = Signal(str)
+    leak_detected = False
     def __init__(self, node_instance):
         super().__init__()
         #Nde setup
         self.node = node_instance
         #widget setup
-        self.layout = QVBoxLayout()
+        layout = QVBoxLayout()
         self.data_label = QLabel("No Data Recieved...")
         self.data_label.setStyleSheet("font-size: 16px; font-weight: bold;")
-        self.layout.addWidget(self.data_label)
-        self.setLayout(self.layout)
+        layout.addWidget(self.data_label)
+        self.setLayout(layout)
         # Stylesheet stuff
         self.setStyleSheet("""
             QWidget {
@@ -59,13 +60,13 @@ class GenDataWidget(QWidget):
             self.node.destroy_subscription(self.sub)
         if hasattr(self, 'subscription') and self.subscription:
             self.node.destroy_subscription(self.subscription)
-
-class GenDataPlugin(Plugin):
+# Plugin
+class LeakSensorPlugin(Plugin):
     def __init__(self, context):
-        super(GenDataPlugin, self).__init__(context)
-        self.setObjectName('GenDataPlugin')
+        super(LeakSensorPlugin, self).__init__(context)
+        self.setObjectName('LeakSensorPlugin')
         self.node = context.node
-        self.widget = GenDataWidget(self.node)
+        self.widget = LeakSensorWidget(self.node)
         context.add_widget(self.widget)
     # shutdown process
     def shutdown_plugin(self):
