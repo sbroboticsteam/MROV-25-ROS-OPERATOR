@@ -21,24 +21,27 @@ class JoyToController(Node):
             10
         )
 
-        # Map joystick axes to joints
-        self.axis_to_joint = {
-            0: 0,  # left stick X -> joint 0
-            1: 1,  # left stick Y -> joint 1
+        # Axis mapping: joystick axis index -> command index
+        self.axis_map = {
+            0: 0,  # left stick X
+            1: 1,  # left stick Y
+            3: 2,  # right stick X
+            4: 3,  # right stick Y
         }
 
-        self.joint_commands = [0.0, 0.0]
+        # 4 outputs (two sticks)
+        self.commands = [0.0, 0.0, 0.0, 0.0]
 
     def joy_callback(self, msg: Joy):
-        for axis_idx, joint_idx in self.axis_to_joint.items():
+        for axis_idx, cmd_idx in self.axis_map.items():
             if axis_idx < len(msg.axes):
-                self.joint_commands[joint_idx] = round(msg.axes[axis_idx], 3)
+                self.commands[cmd_idx] = round(msg.axes[axis_idx], 3)
 
-        cmd_msg = Float64MultiArray()
-        cmd_msg.data = self.joint_commands
-        self.publisher_.publish(cmd_msg)
+        out = Float64MultiArray()
+        out.data = self.commands
+        self.publisher_.publish(out)
 
-        self.get_logger().info(f'Joint commands: {cmd_msg.data}')
+        self.get_logger().info(f'Controller commands: {out.data}')
 
 
 def main(args=None):
@@ -48,6 +51,3 @@ def main(args=None):
     node.destroy_node()
     rclpy.shutdown()
 
-
-if __name__ == '__main__':
-    main()
