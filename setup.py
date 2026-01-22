@@ -7,12 +7,13 @@ module_name = 'mrov_25_ros_operator' #idk if this is the right name?
 
 setup(
     name=package_name,
-    version='1.1.0',
+    version='1.1.1',
     packages=[package_name],
     data_files=[
         ('share/' +package_name+ '/resource', glob('resource/*.xml')), 
         ('share/ament_index/resource_index/packages', ['resource/' +package_name]),
         ('share/' +package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'resource'), glob('resource/*.png')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
