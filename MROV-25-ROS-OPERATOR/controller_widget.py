@@ -2,15 +2,14 @@
 Widget to display controller inputs
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/21/2026
+Last Update: 1/23/2026
 """
 # imports
 import os
 import rclpy
-import json # might remove later depending on the pub
 from rclpy.node import Node
 from rqt_gui_py.plugin import Plugin
-from std_msgs.msg import String, Float64MultiArray
+from sensor_msgs.msg import Joy
 from python_qt_binding.QtWidgets import QWidget, QLabel
 from python_qt_binding.QtGui import QPixmap
 from python_qt_binding.QtCore import Signal, Slot, Qt
@@ -18,12 +17,10 @@ from ament_index_python.packages import get_package_share_directory
 # main widget
 class ControllerWidget(QWidget):
     # Consts
-    CTRL_SUB = 'controller_input'
-    JOY_SUB = '/arm_controller/commands'
+    JOY_SUB = '/joy'
     PKG_PATH = get_package_share_directory('py_rov_gui')
     # Vars
-    ctrl_signal = Signal(str)
-    joystick_signal = Signal(list)
+    joy_signal = Signal(Joy)
     # init
     def __init__(self, node_instance):
         super().__init__()
@@ -53,10 +50,8 @@ class ControllerWidget(QWidget):
         self.controller.setScaledContents(True)
         self.init_components()
         # Sub & Update Crap
-        self.ctrl_signal.connect(self.process_ctrl_data)
-        self.joystick_signal.connect(self.process_joystick_data)
-        self.ctrl_sub = self.node.create_subscription(String, self.CTRL_SUB, self.ctrl_callback, 10)
-        self.joy_sub = self.node.create_subscription(Float64MultiArray, self.JOY_SUB, self.joystick_callback, 10)
+        self.joy_signal.connect(self.process_joy_data)
+        self.joy_sub = self.node.create_subscription(Joy, self.JOY_SUB, self.joy_callback, 10)
     # methods
     # compomntne init
     def init_components(self):
@@ -104,36 +99,50 @@ class ControllerWidget(QWidget):
             stick.setFixedSize(int(stick.og_w * self.scale), int(stick.og_h * self.scale))
             stick.raise_()
     # Callbacks
-    def ctrl_callback(self, msg):
-        self.ctrl_signal.emit(msg.data)
-    def joystick_callback(self, msg):
-        self.joystick_signal.emit(list(msg.data))
-    # GUI Updatess
-    # -- NOTE Most of this stuff isnt properly tested, as i dont have a xbox controller so :p
-    @Slot(str)
-    def process_ctrl_data(self, json_str): # i have no clue if this works, but it makes sense that it would? but monkeys paw also idk
+    def joy_callback(self, msg:Joy):
+        self.joy_signal.emit(msg)
+    @Slot(Joy)
+    def process_joy_data(self, msg:Joy):
         try:
-            data = json.loads(json_str)
-            for btn in ['A', 'B', 'X', 'Y']:
-                if btn in data:
-                    self.buttons[btn].set_pressed(data[btn] == 1) # checks if the button is published state is 1 ie active
+            # joystick & Dpad handeler
+            if len(msg.axes) >= 5:
+                max_dist = 25 # might change to an equation for better scalability idk tho if its necessary
+                self.update_stick_pos(self.sticks['L'], msg.axes[0], msg.axes[1], max_dist)
+                self.update_stick_pos(self.sticks['R'], msg.axes[2], msg.axes[3], max_dist)
+                match msg.axes[4]:
+                    case 1: 
+                        self.buttons['LEFT'].set_pressed(True)
+                        self.buttons['RIGHT'].set_pressed(False)
+                    case -1:
+                        self.buttons['LEFT'].set_pressed(False)
+                        self.buttons['RIGHT'].set_pressed(True)
+                    case _:
+                        self.buttons['LEFT'].set_pressed(False)
+                        self.buttons['RIGHT'].set_pressed(False)
+                match msg.axes[5]:
+                    case 1: 
+                        self.buttons['UP'].set_pressed(True)
+                        self.buttons['DOWN'].set_pressed(False)
+                    case -1:
+                        self.buttons['UP'].set_pressed(False)
+                        self.buttons['DOWN'].set_pressed(True)
+                    case _:
+                        self.buttons['UP'].set_pressed(False)
+                        self.buttons['DOWN'].set_pressed(False)
+            # Ordered the same was as the Joy Node Publishes
+            # btn handeler
+            btn_map = {'A': 0, 'B': 1, 'X': 2, 'Y': 3, 'LB': 5, 'RB': 6, 'LT': 7, 'RT': 8}
+            for name, index in btn_map.items():
+                if len(msg.buttons) > index:
+                    is_pressed = msg.buttons[index] == 1
+                    self.buttons[name].set_pressed(is_pressed)
         except Exception as ex:
-            print(f"| Bad CONTROLLER Thing Happend | {ex}")
-    @Slot(list)
-    def process_joystick_data(self, axes):
-        try:
-            max_dist = 25 # change later depending on testsing
-            if len(axes) >= 4:
-                self.update_stick_pos(self.sticks['L'], axes[0], axes[1], max_dist)
-                self.update_stick_pos(self.sticks['R'], axes[2], axes[3], max_dist)
-                pass
-        except Exception as ex:
-            print(f"| Bad JOYSTICK Think Happened | {ex}")
+            print(f"| Bad Think Happened | {ex}")
     def update_stick_pos(self, stick, axis_x, axis_y, max_dist):
         base_x = self.offset_x + int(stick.og_x * self.scale)
         base_y = self.offset_y + int(self.TOP_MARGIN * self.scale) + int(stick.og_y * self.scale)
-        move_x = int(axis_x * max_dist * self.scale)
-        move_y = int(axis_y * max_dist * self.scale)
+        move_x = int(-axis_x * max_dist * self.scale)
+        move_y = int(-axis_y * max_dist * self.scale)
         stick.move(base_x + move_x, base_y + move_y)
 
     # shutdown
