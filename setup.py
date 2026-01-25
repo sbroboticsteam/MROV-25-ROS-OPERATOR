@@ -33,7 +33,7 @@ setup(
         ],
         
         'rqt_gui_py.plugins': [
-            'GenCameraWidget = '+module_name+'.camera_widget.CameraPlugin',
+            'CameraWidget = '+module_name+'.camera_widget.CameraPlugin',
             'GenDataWidget = '+module_name+'.gen_data_widget:GenDataPlugin',
             'LeakSensorWidget = '+module_name+'.leak_sensor_widget.LeakSensorPlugin',
             'MotorDataWidget = '+module_name+'.motor_data_widget.MotorDataPlugin',
