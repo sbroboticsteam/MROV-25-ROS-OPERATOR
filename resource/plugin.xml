@@ -1,20 +1,20 @@
 <library path="MROV-25-ROS-OPERATOR">
-  <!-- Gen Camera Plugin-->
-  <class name="GenCameraWidget" 
-        type="MROV-25-ROS-OPERATOR.gen_camera_widget.GenCameraPlugin" 
+  <!-- Camera Plugin-->
+  <class name="CameraWidget" 
+        type="py_rov_gui.camera_widget.CameraPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
     </description>
     <qtgui>
-      <label>ROS 2 ROV-Gen-Camera</label>
+      <label>ROS 2 ROV-Camera</label>
       <icon type="theme">camera-video</icon>
       <statustip></statustip>
     </qtgui>
   </class>
   <!-- Gen Data Plugin-->
   <class name="GenDataWidget" 
-        type="MROV-25-ROS-OPERATOR.gen_data_widget.GenDataPlugin" 
+        type="py_rov_gui.gen_data_widget.GenDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -27,40 +27,40 @@
   </class>
   <!-- Leak Sensor Plugin-->
   <class name="LeakSensorWidget" 
-        type="MROV-25-ROS-OPERATOR.leak_sensor_widget.LeakSensorPlugin" 
+        type="py_rov_gui.leak_sensor_widget.LeakSensorPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
     </description>
     <qtgui>
       <label>ROS 2 ROV-Leak-Sensor</label>
-      <icon type="theme">utilities-terminal</icon>
+      <icon type="theme">dialog-warning</icon>
       <statustip></statustip>
     </qtgui>
   </class>
   <!-- Motor Data Plugin-->
   <class name="MotorDataWidget" 
-        type="MROV-25-ROS-OPERATOR.motor_data_widget.MotorDataPlugin" 
+        type="py_rov_gui.motor_data_widget.MotorDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
     </description>
     <qtgui>
       <label>ROS 2 ROV-Motor-Data</label>
-      <icon type="theme">utilities-terminal</icon>
+      <icon type="theme">system-run</icon>
       <statustip></statustip>
     </qtgui>
   </class>
   <!-- Speed Data Plugin-->
   <class name="SpeedDataWidget" 
-        type="MROV-25-ROS-OPERATOR.speed_data_widget.SpeedDataPlugin" 
+        type="py_rov_gui.speed_data_widget.SpeedDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
     </description>
     <qtgui>
       <label>ROS 2 ROV-Speed-Data</label>
-      <icon type="theme">measure</icon>
+      <icon type="theme">system-run</icon>
       <statustip></statustip>
     </qtgui>
   </class>
@@ -73,8 +73,9 @@
     </description>
     <qtgui>
       <label>ROS 2 ROV-Controller</label>
-      <icon type="theme">controller</icon>
+      <icon type="theme">input-gaming</icon>
       <statustip></statustip>
     </qtgui>
   </class>
 </library>
+
