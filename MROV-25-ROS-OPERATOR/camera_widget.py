@@ -153,8 +153,6 @@ class GenCameraWidget(QWidget):
     def shutdown(self):
         if hasattr(self, 'sub') and self.sub:
             self.node.destroy_subscription(self.sub)
-        if hasattr(self, 'subscription') and self.subscription:
-            self.node.destroy_subscription(self.subscription)
 # Widget Specific Custom Class
 class CustomButton(QPushButton):
     def __init__(self, parent, img_path, pkg_path, connection, w, h):
