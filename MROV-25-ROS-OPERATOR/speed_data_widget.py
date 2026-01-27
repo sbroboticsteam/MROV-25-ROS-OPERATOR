@@ -2,7 +2,7 @@
 Widget to display if theres a leak in the E-Box
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/12/2026
+Last Update: 1/26/2026
 """
 # imports
 import rclpy
@@ -11,7 +11,7 @@ from rclpy.node import Node
 from rqt_gui_py.plugin import Plugin
 from std_msgs.msg import Float64MultiArray
 from python_qt_binding.QtWidgets import QWidget, QProgressBar, QLabel, QGridLayout
-from python_qt_binding.QtCore import Signal, Slot
+from python_qt_binding.QtCore import Signal, Slot, Qt
 
 class SpeedDataWidget(QWidget):
     # Consts
@@ -25,6 +25,26 @@ class SpeedDataWidget(QWidget):
         super().__init__()
         # Node Setup
         self.node = node_instance
+        # stylesheet setup
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setStyleSheet("""
+            SpeedDataWidget {
+                background: #141414;
+            }
+            QLabel {
+                color: #ccc;
+                background: #282828;
+                border-radius: 5px;
+                padding: 5px;
+                margin: 5px;
+            }
+            QProgressBar {
+                color: #ccc;
+                background: #282828;
+                border-radius: 5px;
+                padding: 5px;
+                margin: 5px;}
+        """)
         # Widget Setup
         layout = QGridLayout()
         self.bars = [] # Holds ProgBars
@@ -43,19 +63,6 @@ class SpeedDataWidget(QWidget):
             layout.addWidget(bar, i, 1)
             layout.addWidget(value_label, i, 2)
         self.setLayout(layout)
-        # Styleshit, do later
-        self.setStyleSheet("""
-            QWidget {
-                color: #ccc;
-                background: #141414;
-                border: 3px solid #282828;
-                border-radius: 5px;
-                padding: 5px;
-                margin: 5px;
-            }
-            QLabel {
-            }
-        """)
         # Singal Connection
         self.value_signal.connect(self.update_bars)
         # Sub Connections
