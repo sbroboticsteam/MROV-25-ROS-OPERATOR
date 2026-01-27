@@ -44,6 +44,7 @@ class CameraWidget(QWidget):
     def shutdown(self):
         self.cam_one.shutdown()
         self.cam_two.shutdown()
+        self.cam_three.shutdown()
 # Plugin Wrapper
 class CameraPlugin(Plugin):
     # Construcgtor
