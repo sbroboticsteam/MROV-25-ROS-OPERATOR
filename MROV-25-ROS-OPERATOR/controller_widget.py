@@ -43,14 +43,7 @@ class ControllerWidget(QWidget):
         self.setObjectName('ctrl_widget')
         self.controller = QLabel(self)
         self.controller.setObjectName('ctrl')
-        self.setStyleSheet("""
-        QWidget#ctrl_widget {
-            background: #141414;
-        }
-        QLabel#ctrl {
-            background: #141414;
-        }
-        """) # terrible fix but im wiiging it
+        # terrible fix but im wiiging it
         self.controller.setPixmap(QPixmap(os.path.join(self.PKG_PATH, 'resource', 'xbox_controller_base.png')))
         self.controller.setScaledContents(True)
         self.init_components()
