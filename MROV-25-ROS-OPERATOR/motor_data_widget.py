@@ -2,7 +2,7 @@
 Widget to display the pwm or what not of the 8 motors in the form of 8 prog bars, will also display if there are any issues w/the motor
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/12/2026
+Last Update: 1/26/2026
 """
 # imports
 import rclpy
@@ -11,7 +11,7 @@ from rclpy.node import Node
 from rqt_gui_py.plugin import Plugin
 from std_msgs.msg import Float64MultiArray
 from python_qt_binding.QtWidgets import QWidget, QProgressBar, QLabel, QGridLayout
-from python_qt_binding.QtCore import Signal, Slot
+from python_qt_binding.QtCore import Signal, Slot, Qt
 
 # widget calss
 class MotorDataWidget(QWidget):
@@ -29,6 +29,27 @@ class MotorDataWidget(QWidget):
         super().__init__()
         # Node Setup
         self.node = node_instance
+        # stylesheet
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setStyleSheet("""
+            MotorDataWidget {
+                background: #141414;
+            }
+            QLabel {
+                color: #ccc;
+                background: #282828;
+                border-radius: 5px;
+                padding: 5px;
+                margin: 5px;
+            }
+            QProgressBar {
+            color: #ccc;
+                background: #282828;
+                border-radius: 5px;
+                padding: 5px;
+                margin: 5px;
+            }
+        """)
         # Widget Setup
         layout = QGridLayout()
         self.bars = [] # Holds ProgBars
@@ -47,19 +68,6 @@ class MotorDataWidget(QWidget):
             layout.addWidget(bar, i, 1)
             layout.addWidget(value_label, i, 2)
         self.setLayout(layout)
-        # Styleshit, do later
-        self.setStyleSheet("""
-            QWidget {
-                color: #ccc;
-                background: #141414;
-                border: 3px solid #282828;
-                border-radius: 5px;
-                padding: 5px;
-                margin: 5px;
-            }
-            QLabel {
-            }
-        """)
         # Singal Connection
         self.value_signal.connect(self.update_bars)
         # Sub Connections
