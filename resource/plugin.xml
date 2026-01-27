@@ -77,5 +77,18 @@
       <statustip></statustip>
     </qtgui>
   </class>
+  <!-- Connectivity Plugin-->
+  <class name="ConnectivityWidget" 
+        type="py_rov_gui.connectivity_widget.ConnectivityPlugin" 
+        base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A
+    </description>
+    <qtgui>
+      <label>ROS 2 ROV-Connectivity Widget</label>
+      <icon type="theme">utilities-terminal</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
 </library>
 
