@@ -2,7 +2,7 @@
 Widget to display controller inputs
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/23/2026
+Last Update: 1/26/2026
 """
 # imports
 import os
@@ -24,7 +24,7 @@ class ControllerWidget(QWidget):
     # init
     def __init__(self, node_instance):
         super().__init__()
-        self.node = node_instance
+        # Var init
         self.buttons = {}
         self.sticks = {}
         self.REF_W = 734
@@ -33,11 +33,16 @@ class ControllerWidget(QWidget):
         self.scale = 1.0
         self.offset_x = 0
         self.offset_y = 0
+        # node setup
+        self.node = node_instance
+        # background color setup
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setStyleSheet('background-color: #141414;')
         # Widget Setup
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.setObjectName("ctrl_widget")
+        self.setObjectName('ctrl_widget')
         self.controller = QLabel(self)
-        self.controller.setObjectName("ctrl")
+        self.controller.setObjectName('ctrl')
         self.setStyleSheet("""
         QWidget#ctrl_widget {
             background: #141414;
@@ -137,14 +142,13 @@ class ControllerWidget(QWidget):
                     is_pressed = msg.buttons[index] == 1
                     self.buttons[name].set_pressed(is_pressed)
         except Exception as ex:
-            print(f"| Bad Think Happened | {ex}")
+            print(f'| Bad Think Happened | {ex}')
     def update_stick_pos(self, stick, axis_x, axis_y, max_dist):
         base_x = self.offset_x + int(stick.og_x * self.scale)
         base_y = self.offset_y + int(self.TOP_MARGIN * self.scale) + int(stick.og_y * self.scale)
         move_x = int(-axis_x * max_dist * self.scale)
         move_y = int(-axis_y * max_dist * self.scale)
         stick.move(base_x + move_x, base_y + move_y)
-
     # shutdown
     def shutdown(self):
         if hasattr(self, 'ctrl_sub') and self.ctrl_sub:
@@ -162,7 +166,7 @@ class ControllerPlugin(Plugin):
     # shutdown process
     def shutdown_plugin(self):
         self.widget.shutdown()
-# Custom Classes
+# Widget Specific Custom Classes
 class XboxButton(QLabel):
     PKG_PATH = get_package_share_directory('py_rov_gui')
     def __init__(self, parent, def_img_path, pressed_img_path, x, y):
@@ -177,7 +181,7 @@ class XboxButton(QLabel):
         self.move(x, y)
         self.setFixedSize(self.def_pixmap.width(), self.def_pixmap.height())
         self.setScaledContents(True)
-        self.setStyleSheet("background: transparent;")
+        self.setStyleSheet('background: transparent;')
         # init states
         self.setPixmap(self.def_pixmap)
         self.is_pressed = False
@@ -202,5 +206,5 @@ class XboxStick(QLabel):
         self.move(x, y)
         self.setFixedSize(self.pixmap.width(), self.pixmap.height())
         self.setScaledContents(True)
-        self.setStyleSheet("background: transparent;")
+        self.setStyleSheet('background: transparent;')
         self.setPixmap(self.pixmap)
