@@ -39,6 +39,7 @@ setup(
             'SpeedDataWidget = '+package_name+'.speed_data_widget.SpeedDataPlugin',
             'ControllerWidget = '+package_name+'.controller_widget.ControllerPlugin'
             'ConnectivityWidget = '+package_name+'.connectivity_widget.ConnectivityPlugin'
+            'FloatWidget = '+package_name+'.float_widget.FloatPlugin'
         ],
     },
 )
