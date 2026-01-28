@@ -7,8 +7,8 @@
       A
     </description>
     <qtgui>
-      <label>ROS 2 ROV-Camera</label>
-      <icon type="theme">camera-video</icon>
+      <label>ROS 2 ROV-Camera Widget</label>
+      <icon type="theme">camera-web</icon>
       <statustip></statustip>
     </qtgui>
   </class>
@@ -20,7 +20,7 @@
       A
     </description>
     <qtgui>
-      <label>ROS 2 ROV-Gen-Data</label>
+      <label>ROS 2 ROV-Gen-Data Widget</label>
       <icon type="theme">utilities-terminal</icon>
       <statustip></statustip>
     </qtgui>
@@ -46,8 +46,8 @@
       A
     </description>
     <qtgui>
-      <label>ROS 2 ROV-Motor-Data</label>
-      <icon type="theme">system-run</icon>
+      <label>ROS 2 ROV-Motor-Data Widget</label>
+      <icon type="theme">media-playlist-repeat</icon>
       <statustip></statustip>
     </qtgui>
   </class>
@@ -59,8 +59,8 @@
       A
     </description>
     <qtgui>
-      <label>ROS 2 ROV-Speed-Data</label>
-      <icon type="theme">system-run</icon>
+      <label>ROS 2 ROV-Speed-Data Widget</label>
+      <icon type="theme">go-next</icon>
       <statustip></statustip>
     </qtgui>
   </class>
@@ -72,7 +72,7 @@
       A
     </description>
     <qtgui>
-      <label>ROS 2 ROV-Controller</label>
+      <label>ROS 2 ROV-Controller Widget</label>
       <icon type="theme">input-gaming</icon>
       <statustip></statustip>
     </qtgui>
@@ -86,9 +86,21 @@
     </description>
     <qtgui>
       <label>ROS 2 ROV-Connectivity Widget</label>
-      <icon type="theme">utilities-terminal</icon>
+      <icon type="theme">network-wired</icon>
+      <statustip></statustip>
+    </qtgui>
+  </class>
+  <!-- Float Plugin-->
+  <class name="FloatWidget" 
+        type="py_rov_gui.float_widget.FloatPlugin" 
+        base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A
+    </description>
+    <qtgui>
+      <label>ROS 2 ROV-Float Widget</label>
+      <icon type="theme">pda</icon>
       <statustip></statustip>
     </qtgui>
   </class>
 </library>
-
