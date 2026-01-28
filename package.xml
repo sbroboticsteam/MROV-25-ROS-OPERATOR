@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>MROV-25-ROS-OPERATOR</name>
+  <name>py_rov_gui</name>
   <version>0.1.0</version>
   <description>A Package containing all Custom RQT GUI Widgets</description>
   <maintainer email="tchen11898@gmail.com">Tyerone Chen</maintainer>
@@ -14,6 +14,8 @@
   <depend>rqt_gui_py</depend>
   <depend>python_qt_binding</depend>
   <depend>ament_index_python</depend>
+  <depend>python3-numpy</depend>
+  <depend>python3-pyqtgraph</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
