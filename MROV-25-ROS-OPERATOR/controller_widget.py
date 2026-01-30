@@ -2,12 +2,11 @@
 Widget to display controller inputs
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/26/2026
+Last Update: 1/29/2026
 """
 # imports
 import os
-import rclpy
-from rclpy.node import Node
+from rclpy.callback_groups import ReentrantCallbackGroup
 from rqt_gui_py.plugin import Plugin
 from sensor_msgs.msg import Joy
 from python_qt_binding.QtWidgets import QWidget, QLabel
@@ -35,6 +34,7 @@ class ControllerWidget(QWidget):
         self.offset_y = 0
         # node setup
         self.node = node_instance
+        self.callback_group = ReentrantCallbackGroup()
         # background color setup
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet('background-color: #141414;')
@@ -49,7 +49,7 @@ class ControllerWidget(QWidget):
         self.init_components()
         # Sub & Update Crap
         self.joy_signal.connect(self.process_joy_data)
-        self.joy_sub = self.node.create_subscription(Joy, self.JOY_SUB, self.joy_callback, 10)
+        self.joy_sub = self.node.create_subscription(Joy, self.JOY_SUB, self.joy_callback, 10, callback_group=self.callback_group)
     # methods
     # compomntne init
     def init_components(self):
