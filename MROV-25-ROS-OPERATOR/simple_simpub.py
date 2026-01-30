@@ -1,13 +1,13 @@
 """
 Author: Tyerone Chen
-Last Update: 12/2/2025
+Last Update: 1/29/2026
 """
 # imports
 import math
 import random
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32, String, Float64MultiArray
+from std_msgs.msg import Float32, String, Float64MultiArray, MultiArrayLayout, MultiArrayDimension
 
 class SimPublisher(Node):
     # consts
@@ -16,10 +16,13 @@ class SimPublisher(Node):
     LEAK_PUB_NAME = 'rov/leak'
     MOTOR_PUB_NAME = 'rov/motor'
     SPEED_PUB_NAME = 'rov/speed'
+    FLOAT_TOPIC = 'float/data'
     MAX_MOTOR_VAL = 1
     MIN_MOTOR_VAL = -1
     MAX_SPEED_VAL = 100
     MIN_SPEED_VAL = 0
+    MAX_FLOAT_DEPTH_VAL = 0.001 # assuming in meters
+    MIN_FLOAT_DEPTH_VAL = 8.0
 
     TIMER_INTERVAL = 0.1
     # vfars
@@ -32,6 +35,7 @@ class SimPublisher(Node):
         self.leak_pub = self.create_publisher(String, self.LEAK_PUB_NAME, 10)
         self.motor_pub = self.create_publisher(Float64MultiArray, self.MOTOR_PUB_NAME, 10)
         self.speed_pub = self.create_publisher(Float64MultiArray, self.SPEED_PUB_NAME, 10)
+        self.float_pub = self.create_publisher(Float64MultiArray, self.FLOAT_TOPIC, 10)
         # timer setup
         self.timer = self.create_timer(self.TIMER_INTERVAL, self.timer_callback)
         # logger
@@ -89,6 +93,13 @@ class SimPublisher(Node):
         speed_msg = Float64MultiArray()
         speed_msg.data = speed_data
         self.speed_pub.publish(speed_msg)
+        # Float Display Publisher
+        if (self.counter) % 10 == 0: # every 5 sec
+            float_msg = Float64MultiArray()
+            rand_depth_data = random.uniform(self.MIN_FLOAT_DEPTH_VAL, self.MAX_FLOAT_DEPTH_VAL)
+            # formated as [time, depth] -- this'll probably be changed with the actual float code for now it's for testing --
+            float_msg.data = [float(self.counter / 100), float(rand_depth_data)]
+            self.float_pub.publish(float_msg)
         # Incrementer
         self.counter += 1
     # shutdown mcgee
@@ -101,6 +112,5 @@ def main(args=None):
     rclpy.spin(sim_pub)
     sim_pub.shutdown()
     rclpy.shutdown()
-
 if __name__ == '__main__':
     main()
