@@ -2,7 +2,7 @@
 A Camera Widget - Used for displaying multiple camera feedss
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/29/2026
+Last Update: 1/30/2026
 """
 # imports
 import os
@@ -74,18 +74,19 @@ class GenCameraWidget(QWidget):
     def __init__(self, node_instance, camera_name, sub_topic):
         super().__init__()
         # Var
-        self.is_subbed = False
-        self.is_processing = False
         self.callback_group = ReentrantCallbackGroup() # allows for parallel callbacks
         self.node = node_instance
         # setup
-        self.setup_ui(sub_topic, camera_name)
+        self.setup_ui(camera_name)
         # Connections
         self.image_signal.connect(self.update_image_label)
         self.bridge = CvBridge()
-        self.start_feed(sub_topic)
+        self.sub = self.node.create_subscription(CompressedImage, sub_topic, self.callback, 10, callback_group=self.callback_group)
+        self.is_processing = False
+        self.is_subbed = True
+        self.node.get_logger().info(f'{self.name.text()} Feed Started...')
     # UI Setup Related Methods
-    def setup_ui(self, sub_topic, camera_name):
+    def setup_ui(self, camera_name):
         # Labels
         # feed label setup
         self.feed = QLabel()
@@ -98,9 +99,9 @@ class GenCameraWidget(QWidget):
         self.name.setAlignment(Qt.AlignCenter)
         # Btn Setup
         self.buttons = {}
-        self.buttons['play'] = CustomButton(self, 'play_white.png', self.PKG_PATH, lambda:self.start_feed(sub_topic), 50, 50)
+        self.buttons['play'] = CustomButton(self, 'play_white.png', self.PKG_PATH, lambda:self.set_feed(True), 50, 50)
         self.buttons['play'].setStyleSheet('background: green;')
-        self.buttons['pause'] = CustomButton(self, 'pause_white.png', self.PKG_PATH, self.stop_feed, 50, 50)
+        self.buttons['pause'] = CustomButton(self, 'pause_white.png', self.PKG_PATH, lambda:self.set_feed(False), 50, 50)
         self.buttons['pause'].setStyleSheet('background: red;')
         # Button Layout Setup
         self.btn_layout = QHBoxLayout()
@@ -131,31 +132,25 @@ class GenCameraWidget(QWidget):
         else:
             self.feed.setPixmap(no_signal_pixmap)
     # Buttons / Feed Methods
-    def start_feed(self, sub_topic): 
-        if not self.is_subbed:
-            self.sub = self.node.create_subscription(CompressedImage, sub_topic, self.callback, 10, callback_group=self.callback_group)
-            self.is_subbed = True
-            self.node.get_logger().info(f'{self.name.text()} Feed Started...')
-    def stop_feed(self):
-        if self.is_subbed:
-            self.node.destroy_subscription(self.sub)
-            self.sub = None
-            self.is_subbed = False
-            self.node.get_logger().info(f'{self.name.text()} Feed Stopped...')
+    def set_feed(self, state:bool):
+        self.is_subbed = state
+        log_msg = (f'{self.name.text()} Feed Started...') if self.is_subbed else (f'{self.name.text()} Feed Stopped...')
+        self.node.get_logger().info(log_msg)
     def callback(self, msg):
         if self.is_processing: # trying to remove any backlog of image processes occuring
             return
-        try:
-            self.is_processing = True
-            # haveta convert from bgr to rgb, else pyqt will throw a fit and make everything colorblind
-            frame_bgr = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
-            frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-            h, w, ch = frame_rgb.shape
-            qimg = QImage(frame_rgb.data, w, h, ch * w, QImage.Format_RGB888).copy()
-            self.image_signal.emit(qimg)
-        except Exception as ex:
-            self.node.get_logger().error(f'ERROR in {self.name.text()} callback: {ex}')
-            self.is_processing = False
+        if self.is_subbed:
+            try:
+                self.is_processing = True
+                # haveta convert from bgr to rgb, else pyqt will throw a fit and make everything colorblind
+                frame_bgr = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
+                frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+                h, w, ch = frame_rgb.shape
+                qimg = QImage(frame_rgb.data, w, h, ch * w, QImage.Format_RGB888).copy()
+                self.image_signal.emit(qimg)
+            except Exception as ex:
+                self.node.get_logger().error(f'ERROR in {self.name.text()} callback: {ex}')
+                self.is_processing = False
     @Slot(QImage)
     def update_image_label(self, qimg):
         self.feed.setPixmap(QPixmap.fromImage(qimg))
