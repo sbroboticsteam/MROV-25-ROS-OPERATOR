@@ -2,21 +2,29 @@
 A Camera Widget - Used for displaying multiple camera feedss
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/30/2026
+Last Update: 3/1/2026
 """
 # imports
 import os
 import cv2
-import threading
+from datetime import datetime
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rqt_gui_py.plugin import Plugin
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import CompressedImage, Image
 from cv_bridge import CvBridge
 from python_qt_binding.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton
 from python_qt_binding.QtCore import Signal, Slot, Qt
 from python_qt_binding.QtGui import QIcon, QImage, QPixmap
 from ament_index_python.packages import get_package_share_directory
+# Boring Pathing Crap
+_share_dir = get_package_share_directory('py_rov_gui')
+_ws_root = os.path.abspath(os.path.join(_share_dir, '..', '..', '..', '..'))
+RES_PATH = os.path.join(_ws_root, 'src', 'py_rov_gui', 'resource')
+ASSETS_PATH = os.path.join(RES_PATH, 'cam_assets')
+OUTPUT_PATH = os.path.join(ASSETS_PATH, 'output')
+os.makedirs(ASSETS_PATH, exist_ok=True)
+os.makedirs(OUTPUT_PATH, exist_ok=True)
 # Main Camera Widget, holds 3 instances of the GenCamera Widget
 class CameraWidget(QWidget):
     # Consts
@@ -26,33 +34,52 @@ class CameraWidget(QWidget):
         # background color setup
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet('background-color: #141414;')
-        # setup multithreading
-        self.executor = MultiThreadedExecutor()
-        self.executor.add_node(self.node)
-        self.executor_thread = threading.Thread(target=self.executor.spin, daemon=True)
-        self.executor_thread.start()
         # Camera Setup
-        self.cam_one = GenCameraWidget(self.node, 'Camera 1', '/rov/camera/image_raw')
-        self.cam_two = GenCameraWidget(self.node, 'Camera 2', '/rov/camera/image_raw')
-        self.cam_three = GenCameraWidget(self.node, 'Camera 3', '/rov/camera/image_raw')
-        # Vertical Layout Setup
-        self.small_cam_layout = QVBoxLayout()
-        self.small_cam_layout.setContentsMargins(0, 0, 0, 0)
-        self.small_cam_layout.setSpacing(0)
-        self.small_cam_layout.addWidget(self.cam_two)
-        self.small_cam_layout.addWidget(self.cam_three)
+        self.usb_one = GenCameraWidget(self.node, 'USB Camera 1', '/rov/camera/image_raw', True)
+        self.usb_two = GenCameraWidget(self.node, 'USB Camera 2', '/rov/camera/usb1/image', True)
+        self.zed_left = GenCameraWidget(self.node, 'ZED Left', '/rov/camera/zed/left/image', True)
+        self.zed_right = GenCameraWidget(self.node, 'ZED Right', '/rov/camera/zed/right/image', True)
+        self.cam_front = GenCameraWidget(self.node, '360 Front', '/rov/camera/insta360/front/image', True)
+        self.cam_back = GenCameraWidget(self.node, '360 Back', '/rov/camera/insta360/back/image', True)
+        # USB Cam layout
+        self.usb_cam_layout = QHBoxLayout()
+        self.usb_cam_layout.setContentsMargins(0, 0, 0, 0)
+        self.usb_cam_layout.setSpacing(0)
+        self.usb_cam_layout.addWidget(self.usb_one)
+        self.usb_cam_layout.addWidget(self.usb_two)
+        # ZED Layout Setup
+        self.zed_cam_layout = QHBoxLayout()
+        self.zed_cam_layout.setContentsMargins(0, 0, 0, 0)
+        self.zed_cam_layout.setSpacing(0)
+        self.zed_cam_layout.addWidget(self.zed_left)
+        self.zed_cam_layout.addWidget(self.zed_right)
+        # Quad Layout
+        self.quad_layout = QVBoxLayout()
+        self.quad_layout.setContentsMargins(0, 0, 0, 0)
+        self.quad_layout.setSpacing(0)
+        self.quad_layout.addLayout(self.usb_cam_layout, stretch=2)
+        self.quad_layout.addLayout(self.zed_cam_layout, stretch=2)
+        # 360 Layout Setup
+        self.three_cam_layout = QVBoxLayout()
+        self.three_cam_layout.setContentsMargins(0, 0, 0, 0)
+        self.three_cam_layout.setSpacing(0)
+        self.three_cam_layout.addWidget(self.cam_front)
+        self.three_cam_layout.addWidget(self.cam_back)
         # Main Layout Setup
         self.main_layout = QHBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
-        self.main_layout.addWidget(self.cam_one, stretch=2)
-        self.main_layout.addLayout(self.small_cam_layout, stretch=1)
+        self.main_layout.addLayout(self.quad_layout, stretch=2)
+        self.main_layout.addLayout(self.three_cam_layout, stretch=1)
         self.setLayout(self.main_layout)
     # Shutdown func
     def shutdown(self):
-        self.cam_one.shutdown()
-        self.cam_two.shutdown()
-        self.cam_three.shutdown()
+        self.usb_one.shutdown()
+        self.usb_two.shutdown()
+        self.zed_left.shutdown()
+        self.zed_right.shutdown()
+        self.cam_front.shutdown()
+        self.cam_back.shutdown()
 # Plugin Wrapper
 class CameraPlugin(Plugin):
     # Construcgtor
@@ -66,12 +93,11 @@ class CameraPlugin(Plugin):
         self.widget.shutdown()
 # Camera Widget
 class GenCameraWidget(QWidget):
-    # Consts
     PKG_PATH = get_package_share_directory('py_rov_gui')
     # Vars
     image_signal = Signal(QImage)
     # Constructor
-    def __init__(self, node_instance, camera_name, sub_topic):
+    def __init__(self, node_instance, camera_name, sub_topic, is_compressed):
         super().__init__()
         # Var
         self.callback_group = ReentrantCallbackGroup() # allows for parallel callbacks
@@ -79,11 +105,18 @@ class GenCameraWidget(QWidget):
         # setup
         self.setup_ui(camera_name)
         # Connections
+        # IMG Vars
         self.image_signal.connect(self.update_image_label)
         self.bridge = CvBridge()
-        self.sub = self.node.create_subscription(CompressedImage, sub_topic, self.callback, 10, callback_group=self.callback_group)
+        self.is_compressed = is_compressed
+        self.sub = self.node.create_subscription(CompressedImage, sub_topic, self.callback, 10, callback_group=self.callback_group) if is_compressed else self.node.create_subscription(Image, sub_topic, self.callback, 10, callback_group=self.callback_group)
+        # Recording Variables
+        self.fps = 60
+        self.output = None
+        # Misc Bools
         self.is_processing = False
         self.is_subbed = True
+        self.is_recording = False
         self.node.get_logger().info(f'{self.name.text()} Feed Started...')
     # UI Setup Related Methods
     def setup_ui(self, camera_name):
@@ -99,9 +132,9 @@ class GenCameraWidget(QWidget):
         self.name.setAlignment(Qt.AlignCenter)
         # Btn Setup
         self.buttons = {}
-        self.buttons['play'] = CustomButton(self, 'play_white.png', self.PKG_PATH, lambda:self.set_feed(True), 50, 50)
+        self.buttons['play'] = CustomButton(self, 'play_white.png', lambda:self.set_record(True), 50, 50)
         self.buttons['play'].setStyleSheet('background: green;')
-        self.buttons['pause'] = CustomButton(self, 'pause_white.png', self.PKG_PATH, lambda:self.set_feed(False), 50, 50)
+        self.buttons['pause'] = CustomButton(self, 'pause_white.png', lambda:self.set_record(False), 50, 50)
         self.buttons['pause'].setStyleSheet('background: red;')
         # Button Layout Setup
         self.btn_layout = QHBoxLayout()
@@ -126,31 +159,52 @@ class GenCameraWidget(QWidget):
             }
         """)
     def setup_pixmaps(self):
-        no_signal_pixmap = QPixmap(os.path.join(self.PKG_PATH, 'resource', 'no_data.png'))
+        no_signal_pixmap = QPixmap(os.path.join(ASSETS_PATH, 'no_data.png'))
         if no_signal_pixmap.isNull():
             self.feed.setText('NO SIGNAL - [IMAGE MISSING]')
         else:
             self.feed.setPixmap(no_signal_pixmap)
     # Buttons / Feed Methods
-    def set_feed(self, state:bool):
-        self.is_subbed = state
-        log_msg = (f'{self.name.text()} Feed Started...') if self.is_subbed else (f'{self.name.text()} Feed Stopped...')
-        self.node.get_logger().info(log_msg)
+    def set_record(self, state:bool):
+        if self.is_recording is state: # to prevent issues with constantly pressing the record button
+            return
+        self.is_recording = state
+        if not self.is_recording and self.output is not None:
+            self.output.release()
+            self.output = None
+            self.node.get_logger().info(f'{self.name.text()} Stopped and Saved Recording.')
+        else:
+            self.node.get_logger().info(f'{self.name.text()} Started Recording...')
     def callback(self, msg):
         if self.is_processing: # trying to remove any backlog of image processes occuring
             return
-        if self.is_subbed:
-            try:
-                self.is_processing = True
-                # haveta convert from bgr to rgb, else pyqt will throw a fit and make everything colorblind
-                frame_bgr = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
-                frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-                h, w, ch = frame_rgb.shape
-                qimg = QImage(frame_rgb.data, w, h, ch * w, QImage.Format_RGB888).copy()
-                self.image_signal.emit(qimg)
-            except Exception as ex:
-                self.node.get_logger().error(f'ERROR in {self.name.text()} callback: {ex}')
-                self.is_processing = False
+        try:
+            self.is_processing = True
+            # get data
+            frame_bgr = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8') if self.is_compressed else self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            # Recording Crap, i haveta put it here to refer to the w & h, might move it later but idc
+            if self.is_recording and self.output is None:
+                # Format Type
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                # Path to Src crap
+                output_name = os.path.join(OUTPUT_PATH, f"{self.name.text()}_{datetime.now().strftime('%m_%d_%H_%M_%S')}.mp4")
+                os.makedirs(OUTPUT_PATH, exist_ok=True)
+                # Create output file
+                h, w, _ = frame_bgr.shape
+                self.output = cv2.VideoWriter(output_name, fourcc, self.fps, (w, h))
+            if self.output is not None:
+                self.output.write(frame_bgr)
+            # qimage only likes rgb so gotta convert, wololo
+            frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+            h, w, ch = frame_rgb.shape
+            qimg = QImage(frame_rgb.data, w, h, ch * w, QImage.Format_RGB888).copy()
+            # emit data
+            self.image_signal.emit(qimg)
+        except Exception as ex:
+            self.node.get_logger().error(f'ERROR in {self.name.text()} callback: {ex}')
+            self.is_processing = False
+        finally:
+            self.is_processing = False
     @Slot(QImage)
     def update_image_label(self, qimg):
         self.feed.setPixmap(QPixmap.fromImage(qimg))
@@ -160,9 +214,10 @@ class GenCameraWidget(QWidget):
             self.node.destroy_subscription(self.sub)
 # Widget Specific Custom Class
 class CustomButton(QPushButton):
-    def __init__(self, parent, img_path, pkg_path, connection, w, h):
+    def __init__(self, parent, img_path, connection, w, h):
         super().__init__(parent)
-        self.icon = QIcon(os.path.join(pkg_path, 'resource', img_path))
+        icon = os.path.join(ASSETS_PATH, img_path)
+        self.icon = QIcon(icon)
         self.setIcon(self.icon)
         self.clicked.connect(connection)
         self.og_w = w
