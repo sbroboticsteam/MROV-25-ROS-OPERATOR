@@ -2,7 +2,7 @@
 Widget to display controller inputs
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/29/2026
+Last Update: 3/1/2026
 """
 # imports
 import os
@@ -13,11 +13,16 @@ from python_qt_binding.QtWidgets import QWidget, QLabel
 from python_qt_binding.QtGui import QPixmap
 from python_qt_binding.QtCore import Signal, Slot, Qt
 from ament_index_python.packages import get_package_share_directory
+# Boring path/dir crap
+_share_dir = get_package_share_directory('py_rov_gui')
+_ws_root = os.path.abspath(os.path.join(_share_dir, '..', '..', '..', '..'))
+RES_PATH = os.path.join(_ws_root, 'src', 'py_rov_gui', 'resource')
+ASSETS_PATH = os.path.join(RES_PATH, 'ctrl_assets')
+os.makedirs(ASSETS_PATH, exist_ok=True)
 # main widget
 class ControllerWidget(QWidget):
     # Consts
     JOY_SUB = '/joy'
-    PKG_PATH = get_package_share_directory('py_rov_gui')
     # Vars
     joy_signal = Signal(Joy)
     # init
@@ -44,7 +49,7 @@ class ControllerWidget(QWidget):
         self.controller = QLabel(self)
         self.controller.setObjectName('ctrl')
         # terrible fix but im wiiging it
-        self.controller.setPixmap(QPixmap(os.path.join(self.PKG_PATH, 'resource', 'xbox_controller_base.png')))
+        self.controller.setPixmap(QPixmap(os.path.join(ASSETS_PATH, 'xbox_controller_base.png')))
         self.controller.setScaledContents(True)
         self.init_components()
         # Sub & Update Crap
@@ -161,11 +166,10 @@ class ControllerPlugin(Plugin):
         self.widget.shutdown()
 # Widget Specific Custom Classes
 class XboxButton(QLabel):
-    PKG_PATH = get_package_share_directory('py_rov_gui')
     def __init__(self, parent, def_img_path, pressed_img_path, x, y):
         super().__init__(parent)
-        self.def_pixmap = QPixmap(os.path.join(self.PKG_PATH, 'resource', def_img_path))
-        self.pressed_pixmap = QPixmap(os.path.join(self.PKG_PATH, 'resource', pressed_img_path))
+        self.def_pixmap = QPixmap(os.path.join(ASSETS_PATH, def_img_path))
+        self.pressed_pixmap = QPixmap(os.path.join(ASSETS_PATH, pressed_img_path))
         # var storing
         self.og_x, self.og_y = x, y
         self.og_w = self.def_pixmap.width()
@@ -187,10 +191,9 @@ class XboxButton(QLabel):
         else:
             self.setPixmap(self.def_pixmap)
 class XboxStick(QLabel):
-    PKG_PATH = get_package_share_directory('py_rov_gui')
     def __init__(self, parent, img_path, x, y):
         super().__init__(parent)
-        self.pixmap = QPixmap(os.path.join(self.PKG_PATH, 'resource', img_path))
+        self.pixmap = QPixmap(os.path.join(ASSETS_PATH, img_path))
         # var storing
         self.og_x, self.og_y = x, y
         self.og_w = self.pixmap.width()
