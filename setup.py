@@ -29,6 +29,7 @@ setup(
         'console_scripts': [
             'simple_simpub = '+package_name+'.simple_simpub:main',
             'simple_campub = '+package_name+'.simple_campub:main',
+            'simple_floatpub = '+package_name+'.simple_floatpub:main',
         ],
         
         'rqt_gui_py.plugins': [
