@@ -2,30 +2,84 @@
 Widget to display if theres a leak in the E-Box
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 1/29/2026
+Last Update: 3/3/2026
 """
 # imports
-from rqt_gui_py.plugin import Plugin
-from std_msgs.msg import Bool, Float64MultiArray# might change later
-from python_qt_binding.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton, QScrollArea
-from python_qt_binding.QtCore import Signal, Slot, Qt
+import json
 import pyqtgraph as pg
-
+import os
+from rqt_gui_py.plugin import Plugin
+from std_msgs.msg import Bool
+from python_qt_binding.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton, QScrollArea, QSizePolicy
+from python_qt_binding.QtCore import Qt, Signal, Slot, QTimer
+from ament_index_python.packages import get_package_share_directory
+# Boring Pathing Crap
+_share_dir = get_package_share_directory('py_rov_gui')
+_ws_root = os.path.abspath(os.path.join(_share_dir, '..', '..', '..', '..'))
+RES_PATH = os.path.join(_ws_root, 'src', 'py_rov_gui', 'resource')
+ASSETS_PATH = os.path.join(RES_PATH, 'float_assets')
+os.makedirs(ASSETS_PATH, exist_ok=True)
 # Main Widget
 class FloatWidget(QWidget):
+    OUTPUT_FILE = 'output.json'
     def __init__(self, node_instance):
         super().__init__()
-        # vars
-        self.buttons = []
         self.node = node_instance
-        # layout setup
+        # File Pathing for Json Updates
+        self.output_path = os.path.join(ASSETS_PATH, self.OUTPUT_FILE)
+        self.last_size = 0
+        # Timer stuff
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.check_file_update)
+        self.timer.start(500)
+        # Funny Background Thingy
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setStyleSheet('background-color: #141414;')
+        # Button Layout
+        self.buttons = {}
+        self.buttons['start'] = CustomButton(self, 'Start Float', self.start_float)
+        self.button_layout = QHBoxLayout()
+        for button in self.buttons.values():
+            self.button_layout.addWidget(button)
+        # Sidebar Layout
+        self.data_scroll = DataScroll(self.node)
+        self.sidebar_layout = QVBoxLayout()
+        self.sidebar_layout.addWidget(self.data_scroll)
+        self.sidebar_layout.addLayout(self.button_layout)
+        # Graph Setup
+        self.graph = GraphWidget(self.node, 250)
+        self.graph.float_signal.connect(self.graph.update_graph_data)
+        # Main layout setup
         self.main_layout = QHBoxLayout()
-        # Widget Setup
-        self.graph = GraphWidget(node_instance, 'float/data')
-        # Add widgets to layout
-        self.main_layout.addWidget(self.graph)
+        self.main_layout.addWidget(self.graph, stretch=2)
+        self.main_layout.addLayout(self.sidebar_layout, stretch=1)
         self.setLayout(self.main_layout)
-
+    def check_file_update(self):
+        if not os.path.exists(self.output_path): # check if file even gosh darn exists
+            return
+        curr_size = os.path.getsize(self.output_path)
+        if curr_size != self.last_size:
+            self.last_size = curr_size
+            self.read_update()
+    def read_update(self):
+        try:
+            with open(self.output_path, 'r') as file:
+                data = json.load(file)
+            if not data:
+                return
+            latest = data[-1] # will ge the latest data entry
+            label_data = [
+                latest['company_num'], 
+                latest['time'], 
+                latest['pressure'], 
+                latest['depth']
+            ]
+            self.data_scroll.update_labels(label_data)
+            self.graph.float_signal.emit(float(latest['time']), float(latest['depth']))
+        except Exception as ex:
+            print(f'Error While Reading JSON File: {ex}')
+    def start_float(self):
+        pass
     def shutdown(self):
         pass
 # Main Plugin
@@ -40,11 +94,12 @@ class FloatPlugin(Plugin):
         self.widget.shutdown()
 # Custom Widgets
 class GraphWidget(QWidget):
-    float_signal = Signal(float, float) #  -- will have to change later
-    def __init__(self, node_instance, sub_topic):
+    float_signal = Signal(float, float) #  -- might have to change later
+    def __init__(self, node_instance, min_size):
         super().__init__()
         self.node = node_instance
         # layout setup
+        self.setMinimumSize(min_size, min_size)
         self.layout = QVBoxLayout(self)
         # graph Setup
         self.plot_graph = pg.PlotWidget()
@@ -56,46 +111,65 @@ class GraphWidget(QWidget):
         self.data_line = self.plot_graph.plot(x=self.time, y=self.depth, pen=(0, 255, 255), symbol='x')
         # add to layout
         self.layout.addWidget(self.plot_graph)
-        # subscription setup
-        self.float_signal.connect(self.update_graph_data)
-        self.sub = self.node.create_subscription(Float64MultiArray, sub_topic, self.callback, 10)
-    def callback(self, msg):
-        # -- for testing float data is published as [time, depth] will change in the future obv. -- 
-        self.float_signal.emit(msg.data[0], msg.data[1])
     @Slot(float, float)
     def update_graph_data(self, time_data, depth_data):
         self.time.append(time_data)
         self.depth.append(depth_data)
         # update plot data
         self.data_line.setData(self.time, self.depth)
-    def shutdown(self):
-        if hasattr(self, 'sub') and self.sub:
-            self.node.destroy_subscription(self.sub)
+class DataWidget(QWidget):
+    def __init__(self):
+        pass
 # Data types it'll recieve will be the - team name, float time, pressure, and depth -
-class DataScroll(QWidget):
-    data_signal = Signal()
-    def __init__(self, node_instance, sub_topic):
+class DataScroll(QScrollArea):
+    def __init__(self, node_instance):
         super().__init__()
         self.node = node_instance
-        self.labels = []
-        # Setup
-        self.layout = QVBoxLayout(self)
-
+        # Scroll Area Setup
+        self.setWidgetResizable(True)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setStyleSheet("background-color: #1e1e1e; border: none;")
+        # Container for the labels
+        self.container = QWidget()
+        self.container.setStyleSheet("background-color: #1e1e1e;")
+        self.setup_labels()
+        self.setWidget(self.container)
         # Sub & Signal Setup
-        
-    def callback(self, msg):
-        pass
-    @Slot()
-    def append_label(self, data):
-        pass
-    def shutdown(self):
-        if hasattr(self, 'sub') and self.sub:
-            self.node.destroy_subscription(self.sub)
-# The holder for each new data instance, unsure if it'll take too much performance with all of the new instance
-# the benefit will be readability, might have to talke to ruthvick or karamat
+    def setup_labels(self):
+        # Labels
+        min_w = 100
+        self.labels = {}
+        self.labels['company_num'] = DataLabel(self, min_w, 'Comp Num', '')
+        self.labels['time'] = DataLabel(self, min_w, 'Time', 'ms')
+        self.labels['pressure'] = DataLabel(self, min_w, 'PSI', 'pa')
+        self.labels['depth'] = DataLabel(self, min_w, 'Depth', 'm')
+        # Layout
+        self.content_layout = QHBoxLayout(self.container)
+        for label in self.labels.values():
+            self.content_layout.addWidget(label)
+        self.content_layout.addStretch()
+    @Slot(list)
+    def update_labels(self, data):
+        list_order = ['company_num', 'time', 'pressure', 'depth']
+        for i, key in enumerate(list_order):
+            self.labels[key].update_label(data[i])
+# Custom Data Label
 class DataLabel(QLabel):
-    def __init__(self, data): # -- data should be in the format of Team, 
-        super().__init__()
+    def __init__(self, parent, min_w, name:str, unit:str):
+        super().__init__(parent)
+        # variables
+        self.unit = unit
+        self.name = name
+        # Rules and Whatever
+        self.setWordWrap(True)
+        self.setMinimumWidth(min_w)
+        self.setFixedWidth(min_w)
+        self.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        # Def Text should always be name:\n
+        self.setText(f'{self.name}:\n')
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         self.setStyleSheet("""
             font-size: 12px;
             color: white;
@@ -104,17 +178,22 @@ class DataLabel(QLabel):
             padding: 10px;
             margin: 5px;
         """)
-        text = '| '
-        for msg in data:
-            text += (str(msg) + ' |')
-        self.setText(text)
-# not sute if it'll be a sub or a pub for the 
-# -- Note for self, might want to add a textout functionality for the data recieved so that the data can be saved locally to a txt --
-# -- Also so that the graphing can happen at any time perhaps, like the graph data is read from the output.txt?
+    def update_label(self, data):
+        casted = data if isinstance(data, str) else str(data)
+        prev = self.text()
+        self.setText(f'{prev}\n{casted} {self.unit}')
+# Custom Button Class
 class CustomButton(QPushButton):
-    button_signal = Signal(bool)
-    def __init__(self, node_instance, pub_topic):
-        pass
-
-    def shutdown(self):
-        pass
+    def __init__(self, parent, name, connection):
+        super().__init__(parent)
+        self.setObjectName(name)
+        self.setText(name)
+        self.setStyleSheet("""
+            font-size: 12px;
+            color: white;
+            background: #282828;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px;
+        """)
+        self.clicked.connect(connection)
