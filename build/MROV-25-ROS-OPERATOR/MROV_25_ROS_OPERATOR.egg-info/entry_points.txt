@@ -1,3 +1,0 @@
-[console_scripts]
-controller = MROV_25_ROS_OPERATOR.controller:mainjoy_to_controller = MROV_25_ROS_OPERATOR.joy_to_controller:main
-

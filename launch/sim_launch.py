@@ -15,7 +15,7 @@ def generate_launch_description():
 
         # Controller publisher
         Node(
-            package='MROV-25-ROS-OPERATOR',
+            package='MROV_25_ROS_OPERATOR',
             executable='joy_to_controller',
             name='joy_to_controller',
             output='screen'
@@ -23,7 +23,7 @@ def generate_launch_description():
 
         # Thruster mixer
         Node(
-            package='MROV-25-ROS-ROV',
+            package='MROV_25_ROS_ROV',
             executable='rov_input_subscriber',
             name='rov_input_subscriber',
             output='screen'
@@ -31,7 +31,7 @@ def generate_launch_description():
 
         # Splitter node
         Node(
-            package='MROV-25-ROS-ROV',
+            package='MROV_25_ROS_ROV',
             executable='splitter',
             name='thruster_splitter',
             output='screen'

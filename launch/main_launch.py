@@ -15,7 +15,7 @@ def generate_launch_description():
 
         # Controller publisher
         Node(
-            package='MROV-25-ROS-OPERATOR',
+            package='MROV_25_ROS_OPERATOR',
             executable='joy_to_controller',
             name='joy_to_controller',
             output='screen'
