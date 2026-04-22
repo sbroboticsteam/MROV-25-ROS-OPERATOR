@@ -2,22 +2,20 @@
 A A Connectivity Widget to display the connectivity of important assets
 Author: Tyerone Chen
 Create Date: 1/26/2026
-Last Update: 1/26/2026
+Last Update: 4/10/2026
 """
 # imports
-import os
-import rclpy
-from rclpy.node import Node
+import time
 from rqt_gui_py.plugin import Plugin
-from std_msgs.msg import Bool
-from python_qt_binding.QtWidgets import QLabel, QVBoxLayout, QWidget, QSizePolicy
-from python_qt_binding.QtCore import Signal, Slot, Qt
+from rosidl_runtime_py.utilities import get_message
+from python_qt_binding.QtWidgets import QLabel, QVBoxLayout, QWidget
+from python_qt_binding.QtCore import Signal, Slot, Qt, QTimer
 # Main Widget
 class ConnectivityWidget(QWidget):
     def __init__(self, node_instance):
         super().__init__()
         self.node = node_instance
-        self.labels = {}
+        self.labels = []
         # background color setup
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet('background-color: #141414;')
@@ -27,13 +25,16 @@ class ConnectivityWidget(QWidget):
         self.setLayout(self.layout)
     def init_components(self):
         # Labels Setup
-        self.labels['Controller'] = ConnectionLabel(self, self.node, 'Controller', '/op/ctrl')
-        self.labels['Camera #1'] = ConnectionLabel(self, self.node, 'Camera #1', '/rov/camera')
+        self.labels.append(ConnectionLabel(self, self.node, 'Leak', '/rov/leak'))
+        self.labels.append(ConnectionLabel(self, self.node, 'Controller', '/op/ctrl'))
+        self.labels.append(ConnectionLabel(self, self.node, 'Camera #1', '/rov/camera/image_raw'))
+        self.labels.append(ConnectionLabel(self, self.node, 'Camera #2', '/rov/camera'))
+        self.labels.append(ConnectionLabel(self, self.node, 'Camera #3', '/rov/camera'))
         # add to layout
-        for label in self.labels.values():
+        for label in self.labels:
             self.layout.addWidget(label)
     def shutdown(self):
-        for label in self.labels.values():
+        for label in self.labels:
             label.shutdown()
 # Plugin
 class ConnectivityPlugin(Plugin):
@@ -49,21 +50,43 @@ class ConnectivityPlugin(Plugin):
 class ConnectionLabel(QLabel):
     # Consts
     connectivity_signal = Signal(bool)
-    def __init__(self, parent, node_instance, name, sub_path):
+    def __init__(self, parent, node_instance, name, sub_topic):
+        # 
         super().__init__(parent)
         self.node = node_instance
-        # Label setup
+        self.sub_topic = sub_topic
+        self.sub = None
+        self.last_msg_time = 0
+        # Label Setup
         self.setObjectName(name)
         self.setText(name)
         self.setAlignment(Qt.AlignCenter)
-        self.set_connectivity(False) # default state
-        # signal & sub creation
-        self.connectivity_signal.connect(self.set_connectivity)
-        self.sub = self.node.create_subscription(Bool, sub_path, self.callback, 10)
+        self.set_connectivity(False)
+        # Timer Setup
+        self.watchdog = QTimer(self)
+        self.watchdog.timeout.connect(self.check_connectivity)
+        self.watchdog.start(500)
+    # Methods
+    def check_connectivity(self):
+        pubs = self.node.get_publishers_info_by_topic(self.sub_topic)
+        has_publisher = len(pubs) > 0
+        is_active = (time.time() - self.last_msg_time) < 2.0
+        self.set_connectivity(has_publisher and is_active)
+        # Attempt Subscription if not already
+        if has_publisher and self.sub is None:
+            self.last_msg_time = time.time()
+            self.attempt_subscription(pubs[0].topic_type)
+    def attempt_subscription(self, type):
+        try:
+            self.node.get_logger().info(f"Attempting to subscribe to {self.sub_topic} with type {type}")
+            msg_class = get_message(type)
+            self.sub = self.node.create_subscription(msg_class, self.sub_topic, self.callback, 10)
+        except Exception as ex:
+            self.node.get_logger().error(f"Failed to subscribe: {str(ex)}")
     # Callback handeler
     def callback(self, msg):
-        self.connectivity_signal.emit(msg.data)
-        pass
+        self.last_msg_time = time.time()
+        self.connectivity_signal.emit(True)
     @Slot(bool) # putting bool for now
     def set_connectivity(self, state):
         if state: 
