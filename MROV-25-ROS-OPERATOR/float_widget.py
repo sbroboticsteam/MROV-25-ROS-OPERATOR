@@ -2,7 +2,7 @@
 Widget to display if theres a leak in the E-Box
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 3/3/2026
+Last Update: 4/21/2026
 """
 # imports
 import json
@@ -28,6 +28,8 @@ class FloatWidget(QWidget):
         # File Pathing for Json Updates
         self.output_path = os.path.join(ASSETS_PATH, self.OUTPUT_FILE)
         self.last_size = 0
+        # Publisher Stuff
+        self.start_pub = self.node.create_publisher(Bool, '/float/start_signal',10)
         # Timer stuff
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_file_update)
@@ -79,7 +81,10 @@ class FloatWidget(QWidget):
         except Exception as ex:
             print(f'Error While Reading JSON File: {ex}')
     def start_float(self):
-        pass
+        msg = Bool()
+        msg.data = True
+        self.start_pub.publish(msg)
+        self.node.get_logger().info("Widget published start signal to simple_floatpub.")
     def shutdown(self):
         pass
 # Main Plugin
@@ -117,9 +122,6 @@ class GraphWidget(QWidget):
         self.depth.append(depth_data)
         # update plot data
         self.data_line.setData(self.time, self.depth)
-class DataWidget(QWidget):
-    def __init__(self):
-        pass
 # Data types it'll recieve will be the - team name, float time, pressure, and depth -
 class DataScroll(QScrollArea):
     def __init__(self, node_instance):
