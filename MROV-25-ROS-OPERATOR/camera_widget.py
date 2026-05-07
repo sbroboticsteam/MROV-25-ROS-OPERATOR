@@ -2,7 +2,7 @@
 A Camera Widget - Used for displaying multiple camera feedss
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 5/6/2026
+Last Update: 5/7/2026
 """
 # importsw
 import os
@@ -36,30 +36,23 @@ class CameraWidget(QWidget):
         self.node = node_instance
         # background color setup
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.setStyleSheet('background-color: #141414;')
+        self.setStyleSheet('background-color: #141414;')    
         # Camera Setup
-        self.usb_one = GenCameraWidget(self.node, 'USB Camera 1', '/rov/image_raw', True)
-        #self.usb_two = GenCameraWidget(self.node, 'USB Camera 2', '/rov/camera/usb1/image', True)
-        self.zed_left = GenCameraWidget(self.node, 'ZED Left', '/rov/camera/zed/left/image', True)
-        self.zed_right = GenCameraWidget(self.node, 'ZED Right', '/rov/camera/zed/right/image', True)
-        #self.cam_front = GenCameraWidget(self.node, '360 Front', '/rov/camera/insta360/front/image', True)
-        #self.cam_back = GenCameraWidget(self.node, '360 Back', '/rov/camera/insta360/back/image', True)
+        self.cameras = {
+            'usb_one' : GenCameraWidget(self.node, 'USB Camera 1', '/rov/image_raw', True),
+            'zed' : GenCameraWidget(self.node, 'ZED', '/rov/camera/zed/image', True),
+        }
         # Main Layout Setup
         self.main_layout = QHBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
-        self.main_layout.addWidget(self.usb_one)
-        self.main_layout.addWidget(self.zed_left)
-        self.main_layout.addWidget(self.zed_right)
+        self.main_layout.addWidget(self.cameras.get('usb_one'))
+        self.main_layout.addWidget(self.cameras.get('zed'))
         self.setLayout(self.main_layout)
     # Shutdown func
     def shutdown(self):
-        self.usb_one.shutdown()
-        #self.usb_two.shutdown()
-        self.zed_left.shutdown()
-        self.zed_right.shutdown()
-        #self.cam_front.shutdown()
-        #self.cam_back.shutdown()
+        for camera in self.cameras.values():
+            camera.shutdown()
 # Plugin Wrapper
 class CameraPlugin(Plugin):
     # Construcgtor
@@ -206,6 +199,7 @@ class GenCameraWidget(QWidget):
         self.feed.setPixmap(QPixmap.fromImage(qimg))
         self.is_processing = False
     def shutdown(self):
+        self.set_stream(False)
         if hasattr(self, 'sub') and self.sub:
             self.node.destroy_subscription(self.sub)
 # Widget Specific Custom Class
