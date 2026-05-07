@@ -2,16 +2,19 @@
 A Camera Widget - Used for displaying multiple camera feedss
 Author: Tyerone Chen
 Create Date: 11/16/2025
-Last Update: 3/1/2026
+Last Update: 5/6/2026
 """
-# imports
+# importsw
 import os
 import cv2
+import threading 
 from datetime import datetime
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.parameter import Parameter
 from rqt_gui_py.plugin import Plugin
 from sensor_msgs.msg import CompressedImage, Image
+from std_msgs.msg import Bool
 from cv_bridge import CvBridge
 from python_qt_binding.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton
 from python_qt_binding.QtCore import Signal, Slot, Qt
@@ -35,51 +38,28 @@ class CameraWidget(QWidget):
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet('background-color: #141414;')
         # Camera Setup
-        self.usb_one = GenCameraWidget(self.node, 'USB Camera 1', '/rov/camera/image_raw', True)
-        self.usb_two = GenCameraWidget(self.node, 'USB Camera 2', '/rov/camera/usb1/image', True)
+        self.usb_one = GenCameraWidget(self.node, 'USB Camera 1', '/rov/image_raw', True)
+        #self.usb_two = GenCameraWidget(self.node, 'USB Camera 2', '/rov/camera/usb1/image', True)
         self.zed_left = GenCameraWidget(self.node, 'ZED Left', '/rov/camera/zed/left/image', True)
         self.zed_right = GenCameraWidget(self.node, 'ZED Right', '/rov/camera/zed/right/image', True)
-        self.cam_front = GenCameraWidget(self.node, '360 Front', '/rov/camera/insta360/front/image', True)
-        self.cam_back = GenCameraWidget(self.node, '360 Back', '/rov/camera/insta360/back/image', True)
-        # USB Cam layout
-        self.usb_cam_layout = QHBoxLayout()
-        self.usb_cam_layout.setContentsMargins(0, 0, 0, 0)
-        self.usb_cam_layout.setSpacing(0)
-        self.usb_cam_layout.addWidget(self.usb_one)
-        self.usb_cam_layout.addWidget(self.usb_two)
-        # ZED Layout Setup
-        self.zed_cam_layout = QHBoxLayout()
-        self.zed_cam_layout.setContentsMargins(0, 0, 0, 0)
-        self.zed_cam_layout.setSpacing(0)
-        self.zed_cam_layout.addWidget(self.zed_left)
-        self.zed_cam_layout.addWidget(self.zed_right)
-        # Quad Layout
-        self.quad_layout = QVBoxLayout()
-        self.quad_layout.setContentsMargins(0, 0, 0, 0)
-        self.quad_layout.setSpacing(0)
-        self.quad_layout.addLayout(self.usb_cam_layout, stretch=2)
-        self.quad_layout.addLayout(self.zed_cam_layout, stretch=2)
-        # 360 Layout Setup
-        self.three_cam_layout = QVBoxLayout()
-        self.three_cam_layout.setContentsMargins(0, 0, 0, 0)
-        self.three_cam_layout.setSpacing(0)
-        self.three_cam_layout.addWidget(self.cam_front)
-        self.three_cam_layout.addWidget(self.cam_back)
+        #self.cam_front = GenCameraWidget(self.node, '360 Front', '/rov/camera/insta360/front/image', True)
+        #self.cam_back = GenCameraWidget(self.node, '360 Back', '/rov/camera/insta360/back/image', True)
         # Main Layout Setup
         self.main_layout = QHBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
-        self.main_layout.addLayout(self.quad_layout, stretch=2)
-        self.main_layout.addLayout(self.three_cam_layout, stretch=1)
+        self.main_layout.addWidget(self.usb_one)
+        self.main_layout.addWidget(self.zed_left)
+        self.main_layout.addWidget(self.zed_right)
         self.setLayout(self.main_layout)
     # Shutdown func
     def shutdown(self):
         self.usb_one.shutdown()
-        self.usb_two.shutdown()
+        #self.usb_two.shutdown()
         self.zed_left.shutdown()
         self.zed_right.shutdown()
-        self.cam_front.shutdown()
-        self.cam_back.shutdown()
+        #self.cam_front.shutdown()
+        #self.cam_back.shutdown()
 # Plugin Wrapper
 class CameraPlugin(Plugin):
     # Construcgtor
@@ -105,6 +85,9 @@ class GenCameraWidget(QWidget):
         # setup
         self.setup_ui(camera_name)
         # Connections
+        self.sub_topic = sub_topic # Store this for reference
+        self.enable_topic = self.sub_topic.replace('/image', '/enable').replace('/image_raw', '/enable')
+        self.enable_pub = self.node.create_publisher(Bool, self.enable_topic, 10)   
         # IMG Vars
         self.image_signal.connect(self.update_image_label)
         self.bridge = CvBridge()
@@ -117,6 +100,7 @@ class GenCameraWidget(QWidget):
         self.is_processing = False
         self.is_subbed = True
         self.is_recording = False
+        self.is_streaming = False
         self.node.get_logger().info(f'{self.name.text()} Feed Started...')
     # UI Setup Related Methods
     def setup_ui(self, camera_name):
@@ -132,9 +116,9 @@ class GenCameraWidget(QWidget):
         self.name.setAlignment(Qt.AlignCenter)
         # Btn Setup
         self.buttons = {}
-        self.buttons['play'] = CustomButton(self, 'play_white.png', lambda:self.set_record(True), 50, 50)
+        self.buttons['play'] = CustomButton(self, 'play_white.png', lambda:self.set_stream(True), 50, 50)
         self.buttons['play'].setStyleSheet('background: green;')
-        self.buttons['pause'] = CustomButton(self, 'pause_white.png', lambda:self.set_record(False), 50, 50)
+        self.buttons['pause'] = CustomButton(self, 'pause_white.png', lambda:self.set_stream(False), 50, 50)
         self.buttons['pause'].setStyleSheet('background: red;')
         # Button Layout Setup
         self.btn_layout = QHBoxLayout()
@@ -175,6 +159,18 @@ class GenCameraWidget(QWidget):
             self.node.get_logger().info(f'{self.name.text()} Stopped and Saved Recording.')
         else:
             self.node.get_logger().info(f'{self.name.text()} Started Recording...')
+    #
+    def set_stream(self, state:bool):
+        if self.is_streaming is state: return
+        self.is_streaming = state
+        
+        msg = Bool()
+        msg.data = state
+        self.enable_pub.publish(msg)
+        
+        status = "Started" if state else "Stopped"
+        self.node.get_logger().info(f'{self.name.text()} Stream {status}.')
+    #
     def callback(self, msg):
         if self.is_processing: # trying to remove any backlog of image processes occuring
             return
