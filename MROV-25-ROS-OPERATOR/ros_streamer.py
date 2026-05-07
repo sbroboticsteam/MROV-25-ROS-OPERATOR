@@ -2,7 +2,7 @@
 A gstreamer middleman ros2 prublisher, to help interperit gstream messages for the camera gui
 Author: Tyerone Chen
 Create Date: 4/22/2026
-Last Update: 5/6/2026
+Last Update: 5/7/2026
 """
 # imports
 import rclpy
@@ -62,7 +62,7 @@ class RosStreamer(threading.Thread):
         # only occurs when the streamer is killed
         if self.cap:
             self.cap.release()
-        self.node.get_logger().info(f"Thread:{self.topic} has exited")
+        self.node.get_logger().info(f"Thread:{self.image_topic} has exited")
     #
     def shutdown(self):
         self.kill_signal = True
@@ -76,9 +76,7 @@ class StreamerManagerNode(Node):
         # -- FORMAT INFO -> 'ros_topic': 'source' ! filter/conversion ! sink [props]
         self.config = {
             '/rov/camera/image_raw': 'videotestsrc pattern=smpte ! videoconvert ! appsink',
-            '/rov/camera/usb1/image': 'v4l2src device=/dev/video0 ! videoconvert ! appsink',
-            '/rov/camera/zed/left/image': 'udpsrc port=5600 ! application/x-rtp ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink',
-            '/rov/camera/zed/right/image': 'videotestsrc pattern=ball ! videoconvert ! appsink',
+            '/rov/camera/zed/image': 'udpsrc port=5600 buffer-size=524288 caps="application/x-rtp,media=video,clock-rate=90000,encoding-name=H264,payload=96" ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink',
             '/rov/camera/insta360/front/image': 'videotestsrc pattern=snow ! videoconvert ! appsink',
             '/rov/camera/insta360/back/image': 'videotestsrc pattern=checkers ! videoconvert ! appsink'
         }
@@ -91,7 +89,7 @@ class StreamerManagerNode(Node):
     #
     def destroy_node(self):
         self.get_logger().info('Shutting Down Streamer Manager...')
-        for streamer in self.streamers:
+        for streamer in self.streamers.values():
             streamer.shutdown()
         super().destroy_node()
 
