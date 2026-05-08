@@ -5,15 +5,22 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
 
-        # Joystick node
         Node(
             package='joy',
-            executable='joy_node',
-            name='joy_node',
-            output='screen'
+            executable='game_controller_node',
+            name='controller_1',
+            parameters=[{'device_id': 0}],
+            remappings=[('/joy', '/joy1')],
         ),
 
-        # Controller publisher
+        Node(
+            package='joy',
+            executable='game_controller_node',
+            name='controller_2',
+            parameters=[{'device_id': 1}],
+            remappings=[('/joy', '/joy2')],
+        ),
+
         Node(
             package='MROV_25_ROS_OPERATOR',
             executable='joy_to_controller',
@@ -21,5 +28,4 @@ def generate_launch_description():
             output='screen'
         ),
 
-       
     ])

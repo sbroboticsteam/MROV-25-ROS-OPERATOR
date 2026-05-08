@@ -4,14 +4,41 @@ from sensor_msgs.msg import Joy
 from std_msgs.msg import String
 import json
 
+def get_dpad(msg):
+    # Try axes first (joy_node style)
+    if len(msg.axes) >= 8:
+        x = msg.axes[6]
+        y = msg.axes[7]
 
-# Typical Xbox mapping from joy_node
+        return {
+            "up": y > 0.5,
+            "down": y < -0.5,
+            "left": x > 0.5,
+            "right": x < -0.5,
+        }
+
+    # Fallback: button-based (game_controller_node style)
+    if len(msg.buttons) >= 16:
+        return {
+            "up": bool(msg.buttons[11]),
+            "down": bool(msg.buttons[12]),
+            "left": bool(msg.buttons[13]),
+            "right": bool(msg.buttons[14]),
+        }
+
+    # Safe default
+    return {
+        "up": False,
+        "down": False,
+        "left": False,
+        "right": False,
+    }
 AXIS = {
     "left_x": 0,
     "left_y": 1,
     "right_x": 3,
     "right_y": 4,
-    "lt": 2,   # trigger axes often [-1,1]
+    "lt": 2,
     "rt": 5
 }
 
@@ -31,44 +58,55 @@ DPAD_AXIS = {
 
 
 def trigger_to_01(v):
-    # convert [-1,1] → [0,1] and invert so pressed = 1
     return round(1.0 - ((v + 1.0) / 2.0), 3)
 
 
-class JoyToController(Node):
+class DualJoyPublisher(Node):
 
     def __init__(self):
-        super().__init__('joy_to_controller')
+        super().__init__('dual_joy_publisher')
 
-        self.sub = self.create_subscription(
-            Joy,
-            '/joy',
-            self.joy_cb,
-            10
-        )
-
-        self.pub = self.create_publisher(
+        # Publishers
+        self.pub1 = self.create_publisher(
             String,
-            '/controller/full_state',
+            '/controller1/full_state',
             10
         )
 
-        self.get_logger().info("Full controller publisher ready")
+        self.pub2 = self.create_publisher(
+            String,
+            '/controller2/full_state',
+            10
+        )
 
-    def joy_cb(self, msg: Joy):
+        # Subscribers
+        self.sub1 = self.create_subscription(
+            Joy,
+            '/joy1',
+            lambda msg: self.joy_cb(msg, self.pub1),
+            10
+        )
 
+        self.sub2 = self.create_subscription(
+            Joy,
+            '/joy2',
+            lambda msg: self.joy_cb(msg, self.pub2),
+            10
+        )
+
+        self.get_logger().info("Dual controller publisher ready")
+
+    def joy_cb(self, msg: Joy, publisher):
+        dpad = get_dpad(msg)
         data = {
-            # sticks
             "left_x": round(msg.axes[AXIS["left_x"]], 3),
             "left_y": round(msg.axes[AXIS["left_y"]], 3),
             "right_x": round(msg.axes[AXIS["right_x"]], 3),
             "right_y": round(msg.axes[AXIS["right_y"]], 3),
 
-            # triggers 0→1
             "lt": trigger_to_01(msg.axes[AXIS["lt"]]),
             "rt": trigger_to_01(msg.axes[AXIS["rt"]]),
 
-            # buttons (bool)
             "A": bool(msg.buttons[BUTTON["A"]]),
             "B": bool(msg.buttons[BUTTON["B"]]),
             "X": bool(msg.buttons[BUTTON["X"]]),
@@ -76,21 +114,28 @@ class JoyToController(Node):
             "LB": bool(msg.buttons[BUTTON["LB"]]),
             "RB": bool(msg.buttons[BUTTON["RB"]]),
 
-            # d-pad (axes → bool)
-            "dpad_up": msg.axes[DPAD_AXIS["y"]] > 0.5,
-            "dpad_down": msg.axes[DPAD_AXIS["y"]] < -0.5,
-            "dpad_left": msg.axes[DPAD_AXIS["x"]] > 0.5,
-            "dpad_right": msg.axes[DPAD_AXIS["x"]] < -0.5,
+            "dpad_up": dpad["up"],
+            "dpad_down": dpad["down"],
+            "dpad_left": dpad["left"],
+            "dpad_right": dpad["right"],
         }
 
         out = String()
         out.data = json.dumps(data)
-        self.pub.publish(out)
+
+        publisher.publish(out)
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = JoyToController()
+
+    node = DualJoyPublisher()
+
     rclpy.spin(node)
+
     node.destroy_node()
     rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
