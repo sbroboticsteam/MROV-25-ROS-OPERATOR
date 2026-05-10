@@ -1,0 +1,24 @@
+running egg_info
+writing build/MROV_25_ROS_OPERATOR/MROV_25_ROS_OPERATOR.egg-info/PKG-INFO
+writing dependency_links to build/MROV_25_ROS_OPERATOR/MROV_25_ROS_OPERATOR.egg-info/dependency_links.txt
+writing entry points to build/MROV_25_ROS_OPERATOR/MROV_25_ROS_OPERATOR.egg-info/entry_points.txt
+writing requirements to build/MROV_25_ROS_OPERATOR/MROV_25_ROS_OPERATOR.egg-info/requires.txt
+writing top-level names to build/MROV_25_ROS_OPERATOR/MROV_25_ROS_OPERATOR.egg-info/top_level.txt
+reading manifest file 'build/MROV_25_ROS_OPERATOR/MROV_25_ROS_OPERATOR.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file 'build/MROV_25_ROS_OPERATOR/MROV_25_ROS_OPERATOR.egg-info/SOURCES.txt'
+running build
+running build_py
+copying MROV_25_ROS_OPERATOR/joy_to_controller.py -> /home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/build/MROV_25_ROS_OPERATOR/build/lib/MROV_25_ROS_OPERATOR
+running install
+running install_lib
+copying /home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/build/MROV_25_ROS_OPERATOR/build/lib/MROV_25_ROS_OPERATOR/joy_to_controller.py -> /home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/install/MROV_25_ROS_OPERATOR/lib/python3.10/site-packages/MROV_25_ROS_OPERATOR
+byte-compiling /home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/install/MROV_25_ROS_OPERATOR/lib/python3.10/site-packages/MROV_25_ROS_OPERATOR/joy_to_controller.py to joy_to_controller.cpython-310.pyc
+running install_data
+running install_egg_info
+removing '/home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/install/MROV_25_ROS_OPERATOR/lib/python3.10/site-packages/MROV_25_ROS_OPERATOR-0.0.0-py3.10.egg-info' (and everything under it)
+Copying build/MROV_25_ROS_OPERATOR/MROV_25_ROS_OPERATOR.egg-info to /home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/install/MROV_25_ROS_OPERATOR/lib/python3.10/site-packages/MROV_25_ROS_OPERATOR-0.0.0-py3.10.egg-info
+running install_scripts
+Installing controller script to /home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/install/MROV_25_ROS_OPERATOR/lib/MROV_25_ROS_OPERATOR
+Installing joy_to_controller script to /home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/install/MROV_25_ROS_OPERATOR/lib/MROV_25_ROS_OPERATOR
+writing list of installed files to '/home/germangiraffe/Documents/tester/ros2_ws/src/MROV-25-ROS-OPERATOR/build/MROV_25_ROS_OPERATOR/install.log'
