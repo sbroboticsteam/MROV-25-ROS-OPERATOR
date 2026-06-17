@@ -1,6 +1,0 @@
-source;share/MROV_25_ROS_OPERATOR/hook/pythonpath.ps1
-source;share/MROV_25_ROS_OPERATOR/hook/pythonpath.dsv
-source;share/MROV_25_ROS_OPERATOR/hook/pythonpath.sh
-source;share/MROV_25_ROS_OPERATOR/hook/ament_prefix_path.ps1
-source;share/MROV_25_ROS_OPERATOR/hook/ament_prefix_path.dsv
-source;share/MROV_25_ROS_OPERATOR/hook/ament_prefix_path.sh
