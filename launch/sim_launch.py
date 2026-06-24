@@ -46,11 +46,11 @@ def generate_launch_description():
             output='screen'
         ),
 
-        # Splitter node
+        # sim mapping 
         Node(
             package='MROV_25_ROS_ROV',
-            executable='sim_map',
-            name='sim_map',
+            executable='serial_map',
+            name='serial_map',
             output='screen'
         ),
     ])
