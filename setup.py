@@ -10,7 +10,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['launch/main_launch.py', 'launch/sim_launch.py']),
+        ('share/' + package_name + '/launch', ['launch/main_launch.py', 'launch/sim_launch.py', 'launch/teleop_launch.py']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,7 +22,8 @@ setup(
     entry_points={
         'console_scripts': [
            "controller = MROV_25_ROS_OPERATOR.controller:main",
-           "joy_to_controller = MROV_25_ROS_OPERATOR.joy_to_controller:main"
+           "joy_to_controller = MROV_25_ROS_OPERATOR.joy_to_controller:main",
+           "teleop_arm = MROV_25_ROS_OPERATOR.teleop_serial_reader:main",
         ],
     },
 )
