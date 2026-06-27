@@ -9,24 +9,16 @@ def generate_launch_description():
        Node(
             package='joy',
             executable='game_controller_node',
-            name='controller_1',
+            name='controller_2',
             parameters=[{'device_id': 0}],
             remappings=[('/joy', '/joy1')],
-        ),
-
-        Node(
-            package='joy',
-            executable='game_controller_node',
-            name='controller_2',
-            parameters=[{'device_id': 1}],
-            remappings=[('/joy', '/joy2')],
         ),
 
         # Controller publisher
         Node(
             package='MROV_25_ROS_OPERATOR',
-            executable='joy_to_controller',
-            name='joy_to_controller',
+            executable='arm_fallback',
+            name='arm_fallback',
             output='screen'
         ),
 
