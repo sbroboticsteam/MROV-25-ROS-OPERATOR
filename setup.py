@@ -2,7 +2,7 @@ import os
 from setuptools import find_packages, setup
 from glob import glob
 
-package_name = 'MROV-25-ROS-OPERATOR' 
+package_name = 'MROV_25_ROS_OPERATOR' 
 
 setup(
     name=package_name,

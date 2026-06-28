@@ -1,7 +1,7 @@
-<library path="MROV-25-ROS-OPERATOR">
+<library path="MROV_25_ROS_OPERATOR">
   <!-- Camera Plugin-->
   <class name="CameraWidget" 
-        type="py_rov_gui.camera_widget.CameraPlugin" 
+        type="MROV_25_ROS_OPERATOR.camera_widget.CameraPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -14,7 +14,7 @@
   </class>
   <!-- Gen Data Plugin-->
   <class name="GenDataWidget" 
-        type="py_rov_gui.gen_data_widget.GenDataPlugin" 
+        type="MROV_25_ROS_OPERATOR.gen_data_widget.GenDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -27,7 +27,7 @@
   </class>
   <!-- Leak Sensor Plugin-->
   <class name="LeakSensorWidget" 
-        type="py_rov_gui.leak_sensor_widget.LeakSensorPlugin" 
+        type="MROV_25_ROS_OPERATOR.leak_sensor_widget.LeakSensorPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -40,7 +40,7 @@
   </class>
   <!-- Motor Data Plugin-->
   <class name="MotorDataWidget" 
-        type="py_rov_gui.motor_data_widget.MotorDataPlugin" 
+        type="MROV_25_ROS_OPERATOR.motor_data_widget.MotorDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -53,7 +53,7 @@
   </class>
   <!-- Speed Data Plugin-->
   <class name="SpeedDataWidget" 
-        type="py_rov_gui.speed_data_widget.SpeedDataPlugin" 
+        type="MROV_25_ROS_OPERATOR.speed_data_widget.SpeedDataPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -66,7 +66,7 @@
   </class>
   <!-- Controller Plugin-->
   <class name="ControllerWidget" 
-        type="py_rov_gui.controller_widget.ControllerPlugin" 
+        type="MROV_25_ROS_OPERATOR.controller_widget.ControllerPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -79,7 +79,7 @@
   </class>
   <!-- Connectivity Plugin-->
   <class name="ConnectivityWidget" 
-        type="py_rov_gui.connectivity_widget.ConnectivityPlugin" 
+        type="MROV_25_ROS_OPERATOR.connectivity_widget.ConnectivityPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
@@ -92,7 +92,7 @@
   </class>
   <!-- Float Plugin-->
   <class name="FloatWidget" 
-        type="py_rov_gui.float_widget.FloatPlugin" 
+        type="MROV_25_ROS_OPERATOR.float_widget.FloatPlugin" 
         base_class_type="rqt_gui_py::Plugin">
     <description>
       A
